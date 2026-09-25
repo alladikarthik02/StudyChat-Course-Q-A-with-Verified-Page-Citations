@@ -25,17 +25,23 @@ class RequestGuards:
         origin = headers.get(b"origin", b"").decode("latin1")
         if origin and origin not in ALLOWED_ORIGINS:
             return await JSONResponse({"detail": "origin_not_allowed"}, 403)(scope, receive, send)
-        if scope["method"] != "POST" or scope["path"] != "/documents":
+        if scope["method"] != "POST" or scope["path"] not in {"/documents", "/chat"}:
             return await self.app(scope, receive, send)
         if self.receiving:
             return await JSONResponse({"detail": "upload_busy"}, 429)(scope, receive, send)
         self.receiving = True
+        owns_slot = True
+        limit = self.max_body_bytes if scope["path"] == "/documents" else 32_768
+        deadline = asyncio.get_running_loop().time() + 60
         try:
             # Bound the entire multipart body even when Content-Length is absent or dishonest.
             body = bytearray()
             while True:
                 try:
-                    message = await asyncio.wait_for(receive(), timeout=15)
+                    remaining = deadline - asyncio.get_running_loop().time()
+                    if remaining <= 0:
+                        raise TimeoutError
+                    message = await asyncio.wait_for(receive(), timeout=min(15, remaining))
                 except TimeoutError:
                     return await JSONResponse({"detail": "upload_timeout"}, 408)(
                         scope, receive, send
@@ -43,7 +49,7 @@ class RequestGuards:
                 if message["type"] == "http.disconnect":
                     return
                 block = message.get("body", b"")
-                if len(body) + len(block) > self.max_body_bytes:
+                if len(body) + len(block) > limit:
                     return await JSONResponse({"detail": "upload_limit"}, 413)(scope, receive, send)
                 body.extend(block)
                 if not message.get("more_body", False):
@@ -57,6 +63,9 @@ class RequestGuards:
                     return {"type": "http.request", "body": bytes(body), "more_body": False}
                 return await receive()
 
+            self.receiving = False
+            owns_slot = False
             await self.app(scope, replay, send)
         finally:
-            self.receiving = False
+            if owns_slot:
+                self.receiving = False

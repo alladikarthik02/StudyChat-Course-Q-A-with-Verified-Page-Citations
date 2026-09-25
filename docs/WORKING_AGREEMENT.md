@@ -23,3 +23,5 @@ User clarification: orient every implementation task toward meeting or exceeding
 The resume contains measured claims that have not been verified. Build the functions to support the claims, then collect evidence and use the measured values. Do not tune tests to reproduce the resume's numbers.
 
 User authorized continuous completion of T1 through T3 in the current run, with an explanation, commit, and push at each checkpoint. Pause after T3. Only necessary source, tests, configuration, lockfiles, and relevant documentation may be committed.
+
+User now authorized continuous completion of T4 through T6, with separate tested commits and pushes, explanations at each checkpoint, and a pause after T6.

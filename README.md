@@ -2,9 +2,9 @@
 
 Course PDF question answering with streaming answers and verified page citations.
 
-Status: **T0–T3 complete**. Local foundation, PDF ingestion/document APIs, and internal citation verification work in offline fixture mode. Chat, live OpenAI integration, and the PDF viewer are planned for T4/T5.
+Status: **T0–T4 complete**. PDF ingestion, scoped retrieval, provisional streaming, and citation verification work in fixture mode. The live OpenAI adapter is implemented and mock-tested; no paid API smoke has run. UI integration is next.
 
-Validation at T3: 81 backend tests passed against real PostgreSQL/pgvector; lint passed. T1 frontend production build and GitHub checks passed. Resume accuracy and answer-rate metrics have not yet been measured.
+Validation at T4: 94 backend tests passed against real PostgreSQL/pgvector. Resume metrics remain unmeasured.
 
 See [local setup and checks](docs/RUNBOOK.md).
 

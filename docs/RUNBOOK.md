@@ -70,3 +70,13 @@ Startup acquires both storage and database ownership, recovers interrupted jobs,
 Use `[D1 p.2 "exact quote"]`; the quote string uses JSON escaping. Unknown aliases, metadata page 0, pages outside context, and malformed references cannot become verified citations. Pass `allow_fuzzy=False` for exact-only sensitivity runs. The default fuzzy score is a normalized indel ratio, not a probability of correctness. See [RapidFuzz's ratio definition](https://rapidfuzz.github.io/RapidFuzz/Usage/fuzz.html#ratio).
 
 Run `pytest backend/tests/test_citations.py` with the project environment to exercise the 46 pure verifier tests. The full suite also tests real PDF ingestion through database-backed page selection into the verifier. Streaming integration is intentionally deferred to T4; there is no working chat endpoint yet.
+
+## Chat and live mode (T4)
+
+`POST /chat` accepts `{ "question": "What is inertia?", "document_ids": ["UUID"] }`. It streams SSE events over POST: start, delta, abstain, verification, error, done. Text is provisional until verification. A below-threshold retrieval abstains before any delta. Errors and incomplete upstream streams never produce verification. Cancellation closes the upstream generator; no generation retries occur. The default threshold 0.25 is **untuned**.
+
+Live mode is opt-in via `STUDYCHAT_PROVIDER_MODE=live` and a server-only `STUDYCHAT_OPENAI_API_KEY`. Uploads additionally require header `X-StudyChat-Consent: yes`; chat requests require `live_consent: true`. This sends extracted text/questions to OpenAI. Fixture and live embeddings cannot be mixed: reupload documents after switching modes. The API rejects selected documents with an incompatible embedding model.
+
+The adapter uses Responses streaming with `store: false`, no tools, a 1,200-token output cap, and pinned `gpt-4.1-mini-2025-04-14`; embeddings use `text-embedding-3-small` at 1,536 dimensions. Source references: [model snapshot](https://developers.openai.com/api/docs/models/gpt-4.1-mini), [streaming events](https://developers.openai.com/api/docs/guides/streaming-responses), [embeddings](https://developers.openai.com/api/docs/guides/embeddings). A pinned model does not make generation perfectly deterministic.
+
+No local API credentials were supplied, so live paid calls have not been run. Mocked HTTP contract tests verify request fields, deltas, completion, disconnects, 429/500 errors, and no retry. `/config` reports mode and transmission requirements without secrets.

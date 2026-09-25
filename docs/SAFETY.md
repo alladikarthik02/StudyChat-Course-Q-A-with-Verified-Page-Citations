@@ -40,3 +40,7 @@ Use generated fixtures in source control. Do not commit private course documents
 - S07: exact/approximate labels, invalid thresholds, number/negation changes, repeated quotes, fuzzy budget exhaustion, and explicit semantic counterexamples are tested. No “answer verified” flag exists.
 - Source-offset tests prove conservative mapping for Unicode expansions/composition and dehyphenation. These do not prove browser glyph highlighting; T5 must test that separately.
 - S06/S08/S09 remain pending for chat streaming and UI. S15/S16 remain pending for real evaluation. Passing 81 regression tests does not establish 90% citation accuracy or 95% answer rate.
+
+## T4 evidence
+
+Scoped cosine retrieval, model mismatch, deleted source, pre-delta abstention, midstream failure, cancellation cleanup, timeout/concurrency caps, explicit live consent, and no-citation outcomes are covered in `test_chat.py`. Provider keys remain server-side. Prompts serialize excerpts as untrusted data and expose no tools. Fencing is not an injection guarantee. UI escape/provisional-state checks remain T5; real metric provenance remains T6/T8.

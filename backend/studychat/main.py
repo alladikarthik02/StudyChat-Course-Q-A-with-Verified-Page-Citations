@@ -8,12 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from studychat.chat import ChatService
+from studychat.chat import router as chat_router
 from studychat.config import Settings
 from studychat.db import ready
 from studychat.documents import router
 from studychat.guards import RequestGuards
 from studychat.ingestion import IngestionService
-from studychat.providers import EmbeddingProvider, FixtureProvider
+from studychat.providers import EmbeddingProvider, FixtureProvider, OpenAIProvider
 
 
 def create_app(
@@ -27,7 +29,10 @@ def create_app(
         if not await asyncio.to_thread(ready, settings):
             yield
             return
-        service = IngestionService(settings, provider or FixtureProvider())
+        selected_provider = provider or (
+            FixtureProvider() if settings.provider_mode == "fixture" else OpenAIProvider(settings)
+        )
+        service = IngestionService(settings, selected_provider)
         # One local service owns both database recovery and the storage directory.
         with (service.storage / ".service.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -40,11 +45,13 @@ def create_app(
                 try:
                     await service.recover()
                     app.state.ingestion = service
+                    app.state.chat = ChatService(settings, selected_provider, service.repo)
                     app.state.ingestion_available = True
                     yield
                 finally:
                     app.state.ingestion_available = False
                     await service.close()
+                    await selected_provider.close()
 
     app = FastAPI(title="StudyChat", version="0.2.0", lifespan=lifespan)
     app.state.settings = settings
@@ -57,9 +64,19 @@ def create_app(
         CORSMiddleware,
         allow_origins=["http://127.0.0.1:5173", "http://localhost:5173"],
         allow_methods=["GET", "POST", "DELETE"],
-        allow_headers=["Content-Type"],
+        allow_headers=["Content-Type", "X-StudyChat-Consent"],
     )
     app.include_router(router)
+    app.include_router(chat_router)
+
+    @app.get("/config")
+    def public_config():
+        return {
+            "provider_mode": settings.provider_mode,
+            "chat_model": settings.chat_model,
+            "threshold_label": settings.threshold_label,
+            "transmits_content": settings.provider_mode == "live",
+        }
 
     @app.exception_handler(psycopg.Error)
     async def database_error(request, exc):

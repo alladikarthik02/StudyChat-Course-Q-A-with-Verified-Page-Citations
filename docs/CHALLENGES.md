@@ -62,3 +62,11 @@ Fuzzy matching posed a correctness tradeoff. Added a deterministic 0.90 normaliz
 Malformed references, unknown aliases, page 0, missing context pages, oversized quotes, duplicate page sources, and budget exhaustion all fail closed. A real database integration test also rejects a ready page from an unselected document. Stored T2 normalized strings are not trusted for highlighting: verification always re-normalizes authoritative page text using the current version.
 
 Interview explanation: exact matching is inexpensive to inspect and reproduce, but conservative approximate matching trades recall against false acceptance. Document that tradeoff, preserve diagnostic reasons, and measure it on development examples before claiming held-out improvements.
+
+## T4 — streaming completion and source lifetime
+
+A network EOF must not count as a completed answer: the live adapter requires the provider's completed event. Partial output followed by an error never receives citation verification and is not retried. A pending generator task is cancelled and closed on client disconnect; its concurrency slot is released. Tests prove these paths, as well as timeout and no-surviving-citation outcomes.
+
+Deletion during generation invalidates the final result: readiness is checked again and missing pages cannot be substituted. Fixture/live embedding spaces are rejected when mixed even though both have 1,536 dimensions. The request-body guard now bounds chat bodies too and applies a total upload deadline; its receive slot is released before streaming so one answer does not block every upload/chat.
+
+Interview explanation: validate retrieval before sending the first answer delta, and treat final verification as a separate state. A second generation after partial text would risk repeating or contradicting what the reader already saw, so this implementation performs no generation retries.

@@ -17,6 +17,8 @@ def service(request: Request):
 @router.post("", status_code=202)
 async def upload(request: Request):
     svc = service(request)
+    if svc.settings.provider_mode == "live" and request.headers.get("X-StudyChat-Consent") != "yes":
+        raise HTTPException(400, "live_transmission_consent_required")
     async with request.form(max_files=1, max_fields=0) as form:
         file = form.get("file")
         if not isinstance(file, UploadFile):
