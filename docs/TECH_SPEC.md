@@ -1,6 +1,6 @@
 # StudyChat technical specification
 
-Status: proposed architecture, reviewed in T0. No implementation or measured results yet.
+Status: architecture reviewed in T0; foundation implemented in T1. No answer-quality metrics measured yet.
 
 ## Goal and boundaries
 

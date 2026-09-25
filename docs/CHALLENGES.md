@@ -38,3 +38,7 @@ Distinguish anticipated risks from failures actually encountered. No implementat
 ## Entry template for subsequent tasks
 
 Task/date; observed failure; minimal reproduction; root cause; alternatives considered; fix; regression test and result; safety impact; remaining limitation; interview explanation. Record actual evidence rather than invented debugging stories.
+
+## T1 — environment and reproducibility
+
+Docker was installed but stopped, and its credential helper was absent from the shell PATH. Started Docker and supplied its bundled executable path; verified real pgvector migration and distance query. pnpm rejected an unapproved esbuild installation script; added the specific esbuild allowance and rebuilt successfully. Locked the same pnpm/Node major versions in CI and the runbook. Neither issue changes retrieval accuracy; both affect whether another developer can reproduce the setup.

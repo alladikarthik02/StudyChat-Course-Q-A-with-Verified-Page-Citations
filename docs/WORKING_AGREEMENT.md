@@ -21,3 +21,5 @@ No previous interview transcripts were supplied. Questions in these documents ar
 User clarification: orient every implementation task toward meeting or exceeding the resume's 90% citation accuracy and 95% answer rate together, or improving toward them when unmet. At each checkpoint explain the contribution and available evidence. Do not promise unmeasured results or treat a nearby value as satisfying an exact claim.
 
 The resume contains measured claims that have not been verified. Build the functions to support the claims, then collect evidence and use the measured values. Do not tune tests to reproduce the resume's numbers.
+
+User authorized continuous completion of T1 through T3 in the current run, with an explanation, commit, and push at each checkpoint. Pause after T3. Only necessary source, tests, configuration, lockfiles, and relevant documentation may be committed.

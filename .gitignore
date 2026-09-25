@@ -11,3 +11,5 @@ dist/
 coverage/
 data/
 eval/private/
+.ruff_cache/
+*.egg-info/

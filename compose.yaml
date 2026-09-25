@@ -1,0 +1,19 @@
+name: studychat
+services:
+  db:
+    image: pgvector/pgvector:0.8.2-pg16
+    environment:
+      POSTGRES_USER: studychat
+      POSTGRES_PASSWORD: local-studychat
+      POSTGRES_DB: studychat
+    ports:
+      - "127.0.0.1:54329:5432"
+    volumes:
+      - studychat-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studychat -d studychat"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  studychat-db:

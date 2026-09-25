@@ -2,7 +2,9 @@
 
 Course PDF question answering with streaming answers and verified page citations.
 
-Status: checkpoint T0 completed (design only); application implementation has not started.
+Status: T1 complete. Local application foundation is implemented; PDF ingestion and citation verification are next.
+
+See [local setup and checks](docs/RUNBOOK.md).
 
 Repository identified from the resume: https://github.com/alladikarthik02/StudyChat-Course-Q-A-with-Verified-Page-Citations
 The remote returned no refs during initial inspection. No code has been pushed.
