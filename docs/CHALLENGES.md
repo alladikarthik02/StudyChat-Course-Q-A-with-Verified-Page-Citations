@@ -1,6 +1,6 @@
 # Architecture review and challenge log
 
-Distinguish anticipated risks from failures actually encountered. No implementation failure has been solved yet.
+Distinguish anticipated risks from failures actually encountered. T0 contains design findings; subsequent entries record actual implementation failures, fixes, and tests.
 
 ## T0 — findings encountered during design
 
@@ -52,3 +52,13 @@ Review found that cancelling `asyncio.to_thread` does not stop a database transa
 The first collection run also caught a Python method named `list` shadowing a subsequent `list[str]` type annotation. Renamed it `list_documents`. After session resumption Docker needed restarting; connectivity failures were treated as test failures, not skipped validation.
 
 Interview explanation: request acceptance is separate from document readiness. A 202 response gives an ID for polling; only the final transaction makes the document ready. UUID-based filenames, bounded parsing, explicit failures, startup recovery, and a single-worker lease prevent partial or interrupted work from masquerading as searchable content.
+
+## T3 — normalization, ambiguous highlights, and fuzzy false positives
+
+Problem: character-by-character NFKC normalization would split combining sequences and Hangul, while ligatures expand one source glyph into multiple characters. Chosen solution: normalize grapheme clusters, map each normalized character conservatively to its original source span, and verify that this agrees with whole-string NFKC. Mapping tests cover ligatures, combining accents, Hangul, halfwidth characters, and line-break dehyphenation. If a composition cannot be mapped safely, verification fails closed. Repeated matches keep a page citation but omit highlight offsets instead of guessing a location.
+
+Fuzzy matching posed a correctness tradeoff. Added a deterministic 0.90 normalized-indel ratio over bounded word windows, with a shared per-answer comparison budget and labels distinct from exact matches. Number and common English negation token changes are rejected even when similarity is high. Boundary tests prove that 0.90 is inclusive and a stricter threshold rejects that same fixture. These are targeted guards, not semantic verification: the test changing “Earth” to “Mars” deliberately demonstrates a remaining approximate-match false positive. Exact-only mode remains available, and T6 must report its sensitivity alongside approximate mode.
+
+Malformed references, unknown aliases, page 0, missing context pages, oversized quotes, duplicate page sources, and budget exhaustion all fail closed. A real database integration test also rejects a ready page from an unselected document. Stored T2 normalized strings are not trusted for highlighting: verification always re-normalizes authoritative page text using the current version.
+
+Interview explanation: exact matching is inexpensive to inspect and reproduce, but conservative approximate matching trades recall against false acceptance. Document that tradeoff, preserve diagnostic reasons, and measure it on development examples before claiming held-out improvements.

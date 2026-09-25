@@ -1,6 +1,6 @@
 # Implementation tasks and checkpoints
 
-T0–T2 are complete. Each row is a stop-and-explain checkpoint, not authorization to skip the user's requested pause. Tests are written alongside the task they protect.
+T0–T3 are complete. Each row is a stop-and-explain checkpoint, not authorization to skip the user's requested pause. Tests are written alongside the task they protect.
 
 There are **9 tasks total (T0–T8)**: one planning task and eight implementation/validation tasks. At the end of each task, review changes, run appropriate checks, commit, push to the StudyChat repository, report the result, and pause.
 
@@ -9,7 +9,7 @@ There are **9 tasks total (T0–T8)**: one planning task and eight implementatio
 | T0 | Read source material; spec, architecture critique, safety matrix, task plan | Source-to-requirement review; explicit unknowns | What does citation verification actually prove? | Complete: design only |
 | T1 | Repository scaffold; React/TS, FastAPI, Compose Postgres/pgvector, migrations, config, fake provider, lockfiles, CI skeleton | Fresh local fixture startup, health/readiness, configuration tests, clean migration | Why this stack and why a fake provider? | Complete |
 | T2 | Bounded PDF ingestion, page/chunk storage, upload/status/list/delete APIs | PDF fixtures; boundary/timeout/failure/restart tests; actual pgvector integration | How do you keep partial ingestion out of search? | Complete |
-| T3 | Citation parser, normalization, exact/fuzzy verifier, offset mapping | Valid/wrong-page/unknown-doc/Unicode/short-quote/malformed/number-negation tests | Why deterministic quote matching, and where does it fail? | Pending |
+| T3 | Citation parser, normalization, exact/fuzzy verifier, offset mapping | Valid/wrong-page/unknown-doc/Unicode/short-quote/malformed/number-negation tests | Why deterministic quote matching, and where does it fail? | Complete |
 | T4 | Scoped retrieval, threshold gate, OpenAI adapter, prompt contract, SSE lifecycle | Fake-provider streaming/error/cancellation tests; live smoke only with configured credentials; record model snapshot | Why abstain before streaming? Why no midstream retry? | Pending |
 | T5 | Upload/chat UI, provisional states, verified chips, PDF.js viewer/highlights | Browser happy path plus wrong citation, cancellation, XSS and highlight-fallback tests | How do two different PDF text extractors agree? | Pending |
 | T6 | Eval schema, fixture corpus, paired off/on scorer, threshold selection script, provenance manifests | Hand-computed scorer fixtures, split checks, offline repeatability; real labels remain separately tracked | How do you prevent selection bias and denominator gaming? | Pending |
@@ -60,3 +60,9 @@ Safety evidence: server-only secret configuration, host restrictions, loopback d
 ## T2 report
 
 Completed upload/status/list/download/delete APIs, bounded isolated PDF extraction, physical-page chunking, metadata page 0, batched fixture embeddings, atomic publication, restart cleanup, and cancellation-safe mutations. Final verification: **33 tests passed** against real PostgreSQL/pgvector, Ruff passed. One upstream test-client deprecation warning remains. Detailed observed challenges and limitations are in CHALLENGES.md; safety evidence is in SAFETY.md. Source PDFs and generated fixtures are not committed. Metric contribution: reliable physical-page identity and prevention of partial indexing; real retrieval/answer accuracy is not measured. Next: T3 citation verification.
+
+## T3 report
+
+Implemented strict citation parsing, exact and labeled approximate quote checks, NFKC/grapheme-aware source offsets, dehyphenation and whitespace normalization, invalid-reference replacement, ambiguity handling, finite resource budgets, and server-scoped database page loading. Added 46 citation tests plus two database integration tests for selected/ready page scope and upload-to-verification. Final local result: **81 tests passed**, no skips, Ruff passed. T1 and T2 GitHub workflows also passed on Linux. T3's commit triggers its own workflow; publication is reported in the task conversation.
+
+Safety evidence: S04 document/page scoping and S07 matching limits are tested at the service level. Frontend chips, streaming, and PDF.js highlighting remain T4/T5 work. Metric contribution: rejects wrong-document/wrong-page/invalid quotes while retaining valid Unicode and hyphenated quotations. The exact-only mode makes future fuzzy sensitivity evaluation possible. Resume metrics remain unmeasured, not inferred from these synthetic regression tests. Interview explanation: matching is deterministic and inspectable, but neither a matching quote nor a 0.9 fuzzy ratio establishes entailment. Stop here as requested; T4 is next and has not started.

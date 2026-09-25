@@ -1,6 +1,6 @@
 # Safety requirements and evidence
 
-Requirements are tracked individually below. T1/T2 have tested evidence; later chat/UI/evaluation controls remain pending. Each implementation task must update the evidence column with actual test names/results and remaining limitations.
+Requirements are tracked individually below. T1–T3 have tested evidence; later chat/UI/evaluation controls remain pending. Each implementation task must update the evidence column with actual test names/results and remaining limitations.
 
 | ID | Invariant / indicator | Planned verification | Evidence |
 | --- | --- | --- | --- |
@@ -33,3 +33,10 @@ Use generated fixtures in source control. Do not commit private course documents
 - S11: foreign-origin rejection, host validation, loopback binding, and single-worker ownership are covered. Public multi-user deployment remains unsupported.
 - S12/S13: parser stderr is discarded; provider failure details are replaced by safe codes; fixture-only mode makes no external calls. Full logging audit is still due in T7.
 - S04–S09 and S14–S16 are only partially addressed or pending until retrieval, chat, UI, and evaluation exist. No answer-quality metrics are claimed.
+
+## T3 evidence
+
+- S04: `test_citation_sources_require_selected_ready_retrieved_pages` and wrong-document/same-page tests pass. Retrieval itself is T4; callers must use server-derived context.
+- S07: exact/approximate labels, invalid thresholds, number/negation changes, repeated quotes, fuzzy budget exhaustion, and explicit semantic counterexamples are tested. No “answer verified” flag exists.
+- Source-offset tests prove conservative mapping for Unicode expansions/composition and dehyphenation. These do not prove browser glyph highlighting; T5 must test that separately.
+- S06/S08/S09 remain pending for chat streaming and UI. S15/S16 remain pending for real evaluation. Passing 81 regression tests does not establish 90% citation accuracy or 95% answer rate.

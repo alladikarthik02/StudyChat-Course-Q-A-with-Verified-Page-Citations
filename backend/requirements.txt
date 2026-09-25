@@ -40,6 +40,10 @@ python-dotenv==1.2.3
     # via pydantic-settings
 python-multipart==0.0.32
     # via -r backend/requirements.in
+rapidfuzz==3.14.6
+    # via -r backend/requirements.in
+regex==2026.9.10
+    # via -r backend/requirements.in
 starlette==1.7.0
     # via fastapi
 typing-extensions==4.16.0

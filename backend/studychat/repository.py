@@ -101,3 +101,24 @@ class DocumentRepository:
             return conn.execute(
                 "SELECT id,state FROM documents WHERE state IN ('failed','deleting')"
             ).fetchall()
+
+    def citation_pages(self, selected_ids: list[UUID], retrieved_pages: list[tuple[UUID, int]]):
+        """Load only ready, selected, physically numbered pages named by server retrieval."""
+        from studychat.citations import PageSource
+
+        pairs = list(dict.fromkeys(retrieved_pages))
+        if len(selected_ids) > 10 or len(pairs) > 6:
+            raise ValueError("citation_context_limit")
+        if not selected_ids or not pairs:
+            return []
+        with connection(self.settings) as conn:
+            rows = conn.execute(
+                "SELECT p.document_id,p.page,p.text FROM pages p "
+                "JOIN documents d ON d.id=p.document_id "
+                "JOIN unnest(%s::uuid[],%s::int[]) AS wanted(document_id,page) "
+                "ON wanted.document_id=p.document_id AND wanted.page=p.page "
+                "WHERE d.state='ready' AND p.document_id=ANY(%s::uuid[]) AND p.page>0 "
+                "ORDER BY p.document_id,p.page",
+                ([pair[0] for pair in pairs], [pair[1] for pair in pairs], selected_ids),
+            ).fetchall()
+            return [PageSource(row["document_id"], row["page"], row["text"]) for row in rows]

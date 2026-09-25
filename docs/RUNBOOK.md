@@ -62,3 +62,11 @@ Only one ingestion runs at a time; overlapping uploads return 429. Malformed, en
 Startup acquires both storage and database ownership, recovers interrupted jobs, retries pending deletes, and removes staging/orphan files. Run one API worker. If the database was unavailable at startup, migrate/restore it and restart the API. Windows native parsing is not supported; use Linux or macOS. No deduplication is currently applied: reuploads get a new ID so failed attempts remain retryable.
 
 [pypdf extraction limitations](https://pypdf.readthedocs.io/en/stable/user/extract-text.html) informed the isolated-parser design. This project handles text PDFs; OCR and browser highlighting arrive outside this checkpoint.
+
+## Citation verification (T3)
+
+`studychat.citations.verify_answer` consumes an answer, server-owned alias-to-document UUID mapping, and `PageSource` records from `DocumentRepository.citation_pages(selected_ids, retrieved_pages)`. It returns exact/approximate/removed statuses, reasons, scores, source spans, a rendered text with invalid citations replaced, and whether any citations survived. The text remains untrusted and must be escaped by T5's UI.
+
+Use `[D1 p.2 "exact quote"]`; the quote string uses JSON escaping. Unknown aliases, metadata page 0, pages outside context, and malformed references cannot become verified citations. Pass `allow_fuzzy=False` for exact-only sensitivity runs. The default fuzzy score is a normalized indel ratio, not a probability of correctness. See [RapidFuzz's ratio definition](https://rapidfuzz.github.io/RapidFuzz/Usage/fuzz.html#ratio).
+
+Run `pytest backend/tests/test_citations.py` with the project environment to exercise the 46 pure verifier tests. The full suite also tests real PDF ingestion through database-backed page selection into the verifier. Streaming integration is intentionally deferred to T4; there is no working chat endpoint yet.

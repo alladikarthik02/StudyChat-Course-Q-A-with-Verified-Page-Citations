@@ -230,3 +230,35 @@ def test_second_api_cannot_recover_an_active_workers_jobs(db_settings):
         with pytest.raises(BlockingIOError):
             with TestClient(create_app(db_settings)):
                 pass
+
+
+def test_citation_sources_require_selected_ready_retrieved_pages(db_settings, pdf_bytes):
+    with TestClient(create_app(db_settings)) as client:
+        first = UUID(upload(client, pdf_bytes()))
+        assert wait_document(client, first)["state"] == "ready"
+        second = UUID(upload(client, pdf_bytes(["Another document at page one."])))
+        assert wait_document(client, second)["state"] == "ready"
+        repo = DocumentRepository(db_settings)
+        sources = repo.citation_pages([first], [(first, 1), (first, 0), (second, 1)])
+        assert len(sources) == 1
+        assert sources[0].document_id == first and sources[0].page == 1
+        assert repo.citation_pages([], [(first, 1)]) == []
+        assert repo.citation_pages([first], [(first, 999)]) == []
+        repo.mark_deleting(first)
+        assert repo.citation_pages([first], [(first, 1)]) == []
+
+
+def test_ingested_pdf_to_verified_citation_uses_original_page(db_settings, pdf_bytes):
+    from studychat.citations import verify_answer
+
+    with TestClient(create_app(db_settings)) as client:
+        doc_id = UUID(upload(client, pdf_bytes()))
+        assert wait_document(client, doc_id)["state"] == "ready"
+        sources = DocumentRepository(db_settings).citation_pages([doc_id], [(doc_id, 2)])
+        result = verify_answer(
+            'Evidence [D1 p.2 "Second page explains inertia."]', {"D1": doc_id}, sources
+        )
+        citation = result.citations[0]
+        assert citation.status == "exact"
+        assert citation.document_id == doc_id and citation.citation.page == 2
+        assert sources[0].text[citation.source_start : citation.source_end] == citation.matched_text

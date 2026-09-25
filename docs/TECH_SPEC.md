@@ -1,6 +1,6 @@
 # StudyChat technical specification
 
-Status: architecture reviewed in T0; foundation implemented in T1. No answer-quality metrics measured yet.
+Status: T0–T3 complete: architecture, foundation, ingestion, and citation verification. Retrieval/chat/UI integration remain planned. No answer-quality metrics measured yet.
 
 ## Goal and boundaries
 
@@ -133,3 +133,13 @@ Browser tests: upload → ready → ask → provisional stream → verification 
 Evaluation tests: hand-calculated fixtures for every metric, duplicates, missing gold pages, wrong-document same-page citations, zero answers, provider errors, paired off/on comparison, and non-finite scores.
 
 Completion requires a fresh-checkout runbook, locked dependencies, passing offline unit/integration/browser checks, safe fixture demo, and clearly separated live evaluation status. A functioning product may precede human evidence; the resume claims remain unverified until that evidence exists.
+
+## T3 implementation decisions
+
+The verifier is currently an internal Python service, ready to integrate into T4 chat. It accepts server-resolved aliases and at most six retrieved ready page sources. Repository loading filters both selected document IDs and physical page pairs; metadata cannot be cited. No browser endpoint accepts arbitrary “source text” as verification evidence.
+
+Normalization version is `nfkc-grapheme-dehyphen-ws-v2`. Offsets are Python Unicode code-point offsets into pypdf text, not PDF.js glyph indexes or JavaScript UTF-16 indexes. T5 must perform its own text-item mapping as specified above. Repeated exact matches or tied approximate locations yield no highlight offsets; the page and quote remain available.
+
+Approximate matching uses RapidFuzz normalized indel ratio, minimum 0.90, over whitespace-token windows of quote token count ±2. It is deliberately bounded and is not exhaustive approximate substring search. A changed number or recognized English negation token is rejected. Other meaning changes remain possible and are explicitly tested. “Exact” means exact after the documented normalization, not byte-identical to the PDF.
+
+Limits: 100,000 answer characters, 100 citations, 2,000 raw/normalized quote characters, six page sources totaling at most 2 million characters, approximate matching only on pages up to 100,000 normalized characters, and 10,000 fuzzy comparisons shared across the answer. Short quotes under 20 normalized characters require exact matching. Resource-limit errors must become a safe terminal chat outcome in T4, never a verified answer. These defaults may reduce answer rate; T6 must count and report their impact before changing them on development data.
