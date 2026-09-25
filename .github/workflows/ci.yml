@@ -34,3 +34,12 @@ jobs:
         working-directory: frontend
       - run: pnpm build
         working-directory: frontend
+      - run: pnpm test
+        working-directory: frontend
+      - run: python scripts/create_demo_pdf.py
+      - run: pnpm exec playwright install --with-deps chromium
+        working-directory: frontend
+      - run: pnpm test:e2e
+        working-directory: frontend
+        env:
+          STUDYCHAT_PYTHON: python

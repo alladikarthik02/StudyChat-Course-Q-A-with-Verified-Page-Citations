@@ -80,3 +80,22 @@ Live mode is opt-in via `STUDYCHAT_PROVIDER_MODE=live` and a server-only `STUDYC
 The adapter uses Responses streaming with `store: false`, no tools, a 1,200-token output cap, and pinned `gpt-4.1-mini-2025-04-14`; embeddings use `text-embedding-3-small` at 1,536 dimensions. Source references: [model snapshot](https://developers.openai.com/api/docs/models/gpt-4.1-mini), [streaming events](https://developers.openai.com/api/docs/guides/streaming-responses), [embeddings](https://developers.openai.com/api/docs/guides/embeddings). A pinned model does not make generation perfectly deterministic.
 
 No local API credentials were supplied, so live paid calls have not been run. Mocked HTTP contract tests verify request fields, deltas, completion, disconnects, 429/500 errors, and no retry. `/config` reports mode and transmission requirements without secrets.
+
+## Browser experience and tests (T5)
+
+The web app now supports uploads, selection, questions, cancellation, final quote chips, and an embedded source viewer. In fixture mode it extracts an excerpt rather than generating semantic answers. Live-mode consent appears before upload/chat is enabled. PDF scripts/annotations are not executed by this canvas/text viewer. Ambiguous text mapping opens the correct page and shows the quote without a guessed highlight.
+
+Frontend checks:
+
+```sh
+cd frontend
+pnpm test
+pnpm build
+pnpm exec playwright install chromium
+cd ..
+.venv/bin/python scripts/create_demo_pdf.py
+cd frontend
+STUDYCHAT_TEST_DATABASE_URL=postgresql://studychat:local-studychat@127.0.0.1:54329/studychat_test pnpm test:e2e
+```
+
+Browser tests start their own fixture API and Vite servers (ports 8000/5173 must be free), require a dedicated `_test` database, and delete test documents between cases. They use a temporary storage directory. Generated screenshots and PDFs stay under ignored `tmp/` or test-results. `STUDYCHAT_PYTHON=python` selects an alternative interpreter for CI. PDF.js code is loaded only when a source is opened.

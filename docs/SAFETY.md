@@ -44,3 +44,7 @@ Use generated fixtures in source control. Do not commit private course documents
 ## T4 evidence
 
 Scoped cosine retrieval, model mismatch, deleted source, pre-delta abstention, midstream failure, cancellation cleanup, timeout/concurrency caps, explicit live consent, and no-citation outcomes are covered in `test_chat.py`. Provider keys remain server-side. Prompts serialize excerpts as untrusted data and expose no tools. Fencing is not an injection guarantee. UI escape/provisional-state checks remain T5; real metric provenance remains T6/T8.
+
+## T5 evidence
+
+S05/S06/S07/S09/S13 are now exercised in the browser: no model HTML execution; no citation chips on interrupted/cancelled streams; exact versus approximate labels; source highlight fallback; explicit live-mode consent. Tests cover UTF-8/frame boundaries and invalid stream transitions. Full accessibility audits and broader browser support remain T7 concerns; Chromium desktop and mobile viewport are tested here.

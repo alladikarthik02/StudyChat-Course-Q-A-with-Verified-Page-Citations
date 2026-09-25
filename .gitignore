@@ -13,3 +13,5 @@ data/
 eval/private/
 .ruff_cache/
 *.egg-info/
+test-results/
+playwright-report/

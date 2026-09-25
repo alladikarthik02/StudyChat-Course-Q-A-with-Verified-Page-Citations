@@ -1,6 +1,6 @@
 # Implementation tasks and checkpoints
 
-T0–T4 are complete. Each row is a stop-and-explain checkpoint, not authorization to skip the user's requested pause. Tests are written alongside the task they protect.
+T0–T5 are complete. Each row is a stop-and-explain checkpoint, not authorization to skip the user's requested pause. Tests are written alongside the task they protect.
 
 There are **9 tasks total (T0–T8)**: one planning task and eight implementation/validation tasks. At the end of each task, review changes, run appropriate checks, commit, push to the StudyChat repository, report the result, and pause.
 
@@ -11,7 +11,7 @@ There are **9 tasks total (T0–T8)**: one planning task and eight implementatio
 | T2 | Bounded PDF ingestion, page/chunk storage, upload/status/list/delete APIs | PDF fixtures; boundary/timeout/failure/restart tests; actual pgvector integration | How do you keep partial ingestion out of search? | Complete |
 | T3 | Citation parser, normalization, exact/fuzzy verifier, offset mapping | Valid/wrong-page/unknown-doc/Unicode/short-quote/malformed/number-negation tests | Why deterministic quote matching, and where does it fail? | Complete |
 | T4 | Scoped retrieval, threshold gate, OpenAI adapter, prompt contract, SSE lifecycle | Fake-provider streaming/error/cancellation tests; live smoke only with configured credentials; record model snapshot | Why abstain before streaming? Why no midstream retry? | Complete; paid smoke not run (no key) |
-| T5 | Upload/chat UI, provisional states, verified chips, PDF.js viewer/highlights | Browser happy path plus wrong citation, cancellation, XSS and highlight-fallback tests | How do two different PDF text extractors agree? | Pending |
+| T5 | Upload/chat UI, provisional states, verified chips, PDF.js viewer/highlights | Browser happy path plus wrong citation, cancellation, XSS and highlight-fallback tests | How do two different PDF text extractors agree? | Complete |
 | T6 | Eval schema, fixture corpus, paired off/on scorer, threshold selection script, provenance manifests | Hand-computed scorer fixtures, split checks, offline repeatability; real labels remain separately tracked | How do you prevent selection bias and denominator gaming? | Pending |
 | T7 | End-to-end hardening and reproducible runbook | Full offline suite, real DB/browser checks, fresh setup, safety matrix evidence | What breaks under failure and concurrent deletion? | Pending |
 | T8 | Human research/corpus evidence, dev tuning, locked live evaluation and truthful resume update | Actual anonymized notes, permitted PDFs, blind gold labels, raw runs, 30-answer spot-check | What do your measured numbers support and not support? | Pending: human evidence required |
@@ -72,3 +72,9 @@ Safety evidence: S04 document/page scoping and S07 matching limits are tested at
 Implemented exact cosine top-six retrieval scoped to selected ready documents and embedding model, pre-delta abstention, pinned OpenAI Responses/embedding adapter, POST SSE events and heartbeats, cancellation, output/time/concurrency limits, and post-generation source revalidation. Fixture mode streams deterministic excerpts. The full suite passes 94 tests with real pgvector; HTTP mocks exercise provider completion/errors/disconnects. No API key was present, so paid live smoke remains unverified. Threshold 0.25 is explicitly untuned. Metric contribution: prevents weak-context generation and cross-document/model retrieval; empirical retrieval recall and resume metrics await real labels.
 
 Safety: S04/S05/S06/S08/S09/S13/S14 now have service-level tests. Live transmission requires explicit request consent. No retries after generation begins. One upstream test-client deprecation warning remains. Next: T5 UI and PDF viewer; continue under the user's T4–T6 authorization.
+
+## T5 report
+
+Built the course library, bounded upload flow, document selection/deletion, consent UI for live transmission, question composer, provisional stream states, cancellation/errors, checked citation chips, and lazy-loaded PDF.js source viewer. The viewer independently maps Unicode text to DOM ranges; ambiguous/missing matches show the quote with a visible fallback. Plain React text rendering prevents model HTML execution. Autoscroll stops when the reader scrolls up; mobile layout is checked.
+
+Validation: 11 frontend unit tests and 7 Chromium browser tests passed, including a real upload → fixture stream → verified page 2 → rendered PDF highlight; production build passed. Visually inspected the rendered result. CI now runs browser tests using generated original PDFs. No PDF binaries, screenshots, browser downloads, node_modules, or build output are committed. Paid live API calls remain untested. Next: T6 evaluation tooling.

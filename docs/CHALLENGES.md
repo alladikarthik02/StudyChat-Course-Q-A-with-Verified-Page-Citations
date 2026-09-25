@@ -70,3 +70,11 @@ A network EOF must not count as a completed answer: the live adapter requires th
 Deletion during generation invalidates the final result: readiness is checked again and missing pages cannot be substituted. Fixture/live embedding spaces are rejected when mixed even though both have 1,536 dimensions. The request-body guard now bounds chat bodies too and applies a total upload deadline; its receive slot is released before streaming so one answer does not block every upload/chat.
 
 Interview explanation: validate retrieval before sending the first answer delta, and treat final verification as a separate state. A second generation after partial text would risk repeating or contradicting what the reader already saw, so this implementation performs no generation retries.
+
+## T5 — PDF.js version changes and text-layer geometry
+
+The installed PDF.js 6 API rejected the older `isEvalSupported` option during TypeScript compilation. Removed that obsolete option; the app uses canvas/text-layer rendering only and does not enable annotation scripting. A browser test initially selected both the visible page canvas and PDF.js's hidden measurement canvas; changed the assertion to the page's accessible label.
+
+Visual inspection caught highlights whose widths did not match the page text. PDF.js 6 requires `--total-scale-factor` and scale-rounding variables on the standalone page container; adding them aligned DOM range geometry with the rendered canvas. Browser tests now assert actual quote highlights and ambiguity fallback. Source offsets from Python are never reused as JavaScript character indexes: the browser normalizes grapheme clusters independently using UTF-16 positions.
+
+The stream decoder rejects sequence gaps, mixed request IDs, truncated UTF-8/events, and missing terminal completion. Final citation chips are applied only after the full stream completes, so a provisional or interrupted answer cannot appear checked. Interview explanation: a successful network response alone is insufficient; completion and verification are separate protocol states that the UI must enforce.
