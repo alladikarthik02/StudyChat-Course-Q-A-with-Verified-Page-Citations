@@ -52,3 +52,13 @@ Backend runtime and development locks are generated with pip-tools 7.6.1 from th
 - [FastAPI lifecycle](https://fastapi.tiangolo.com/advanced/events/)
 - [pgvector Python integration](https://github.com/pgvector/pgvector-python)
 - [Vite setup](https://vite.dev/guide/)
+
+## PDF API (T2)
+
+Upload one PDF using multipart field `file` to `POST /documents`. A 202 response returns its ID; poll `GET /documents/{id}` until `ready` or `failed`. `GET /documents` lists state, `GET /documents/{id}/file` serves ready PDFs, and `DELETE /documents/{id}` removes the source plus derived rows. The upload UI is scheduled for T5; use `/docs` to exercise the API now.
+
+Only one ingestion runs at a time; overlapping uploads return 429. Malformed, encrypted, empty-text, oversized, and over-limit PDFs fail with safe codes. Raw request size is bounded before multipart parsing, with a 64 KiB multipart allowance. Parser limits default to 60 seconds and 512 MiB. Linux enforces an address-space limit; macOS uses a 10 ms RSS watchdog with possible sampling overshoot. CPU time is also bounded. Uploaded files are mode 0600 in a private directory.
+
+Startup acquires both storage and database ownership, recovers interrupted jobs, retries pending deletes, and removes staging/orphan files. Run one API worker. If the database was unavailable at startup, migrate/restore it and restart the API. Windows native parsing is not supported; use Linux or macOS. No deduplication is currently applied: reuploads get a new ID so failed attempts remain retryable.
+
+[pypdf extraction limitations](https://pypdf.readthedocs.io/en/stable/user/extract-text.html) informed the isolated-parser design. This project handles text PDFs; OCR and browser highlighting arrive outside this checkpoint.

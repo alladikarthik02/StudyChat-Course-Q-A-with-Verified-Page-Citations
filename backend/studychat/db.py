@@ -13,7 +13,10 @@ MIGRATIONS = Path(__file__).resolve().parents[1] / "migrations"
 @contextmanager
 def connection(settings: Settings, *, vectors: bool = False):
     with psycopg.connect(
-        settings.database_url.get_secret_value(), connect_timeout=3, row_factory=dict_row
+        settings.database_url.get_secret_value(),
+        connect_timeout=3,
+        row_factory=dict_row,
+        options="-c statement_timeout=10000 -c lock_timeout=5000",
     ) as conn:
         if vectors:
             register_vector(conn)

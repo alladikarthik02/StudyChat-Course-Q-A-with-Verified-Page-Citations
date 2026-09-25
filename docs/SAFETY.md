@@ -1,6 +1,6 @@
 # Safety requirements and evidence
 
-All requirements are currently **specified, not tested**. Each implementation task must update the evidence column with actual test names/results and remaining limitations.
+Requirements are tracked individually below. T1/T2 have tested evidence; later chat/UI/evaluation controls remain pending. Each implementation task must update the evidence column with actual test names/results and remaining limitations.
 
 | ID | Invariant / indicator | Planned verification | Evidence |
 | --- | --- | --- | --- |
@@ -24,3 +24,12 @@ All requirements are currently **specified, not tested**. Each implementation ta
 Prompt fencing reduces risk but is not a guarantee against prompt injection. The first project exposes no model tools, credentials, or cross-user data. Dedicated attack generation and classifiers belong to project 3. Uploaded PDFs remain untrusted even when a quote matches them.
 
 Use generated fixtures in source control. Do not commit private course documents, personal interview notes, credentials, or raw private provider responses by default. Keep private evaluation artifacts local and publish only permitted/redacted evidence. Clearly label any released corpus that differs from the privately evaluated corpus.
+
+## T2 evidence
+
+- S02: `test_upload_limits_origin_and_paths`, extraction limit cases, `test_parser_timeout_kills_worker`, `test_memory_watch_rejects_over_budget_child`, and concurrent-ingestion rejection pass. macOS RSS sampling is approximate, not a hard memory ceiling.
+- S03: traversal-like filenames become display basenames; UUID validation and unknown-file tests pass.
+- S10: transaction rollback, second-batch embedding failure, cancellation, cascading deletion, restart recovery, and late-publication rejection pass against real pgvector.
+- S11: foreign-origin rejection, host validation, loopback binding, and single-worker ownership are covered. Public multi-user deployment remains unsupported.
+- S12/S13: parser stderr is discarded; provider failure details are replaced by safe codes; fixture-only mode makes no external calls. Full logging audit is still due in T7.
+- S04–S09 and S14–S16 are only partially addressed or pending until retrieval, chat, UI, and evaluation exist. No answer-quality metrics are claimed.

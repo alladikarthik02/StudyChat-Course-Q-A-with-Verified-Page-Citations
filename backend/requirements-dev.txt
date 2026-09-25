@@ -44,6 +44,8 @@ pillow==12.3.0
     # via reportlab
 pluggy==1.6.0
     # via pytest
+psutil==7.2.2
+    # via -r backend/requirements.in
 psycopg==3.3.6
     # via -r backend/requirements.in
 psycopg-binary==3.3.6

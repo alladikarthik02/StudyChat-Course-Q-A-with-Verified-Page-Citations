@@ -1,6 +1,6 @@
 # Implementation tasks and checkpoints
 
-T0 and T1 are complete. Each row is a stop-and-explain checkpoint, not authorization to skip the user's requested pause. Tests are written alongside the task they protect.
+T0–T2 are complete. Each row is a stop-and-explain checkpoint, not authorization to skip the user's requested pause. Tests are written alongside the task they protect.
 
 There are **9 tasks total (T0–T8)**: one planning task and eight implementation/validation tasks. At the end of each task, review changes, run appropriate checks, commit, push to the StudyChat repository, report the result, and pause.
 
@@ -8,7 +8,7 @@ There are **9 tasks total (T0–T8)**: one planning task and eight implementatio
 | --- | --- | --- | --- | --- |
 | T0 | Read source material; spec, architecture critique, safety matrix, task plan | Source-to-requirement review; explicit unknowns | What does citation verification actually prove? | Complete: design only |
 | T1 | Repository scaffold; React/TS, FastAPI, Compose Postgres/pgvector, migrations, config, fake provider, lockfiles, CI skeleton | Fresh local fixture startup, health/readiness, configuration tests, clean migration | Why this stack and why a fake provider? | Complete |
-| T2 | Bounded PDF ingestion, page/chunk storage, upload/status/list/delete APIs | PDF fixtures; boundary/timeout/failure/restart tests; actual pgvector integration | How do you keep partial ingestion out of search? | Pending |
+| T2 | Bounded PDF ingestion, page/chunk storage, upload/status/list/delete APIs | PDF fixtures; boundary/timeout/failure/restart tests; actual pgvector integration | How do you keep partial ingestion out of search? | Complete |
 | T3 | Citation parser, normalization, exact/fuzzy verifier, offset mapping | Valid/wrong-page/unknown-doc/Unicode/short-quote/malformed/number-negation tests | Why deterministic quote matching, and where does it fail? | Pending |
 | T4 | Scoped retrieval, threshold gate, OpenAI adapter, prompt contract, SSE lifecycle | Fake-provider streaming/error/cancellation tests; live smoke only with configured credentials; record model snapshot | Why abstain before streaming? Why no midstream retry? | Pending |
 | T5 | Upload/chat UI, provisional states, verified chips, PDF.js viewer/highlights | Browser happy path plus wrong citation, cancellation, XSS and highlight-fallback tests | How do two different PDF text extractors agree? | Pending |
@@ -56,3 +56,7 @@ Read both supplied files and the resume's embedded repository link. The workspac
 Implemented React/TypeScript/Vite shell, FastAPI health/readiness, strict fixture-only configuration, deterministic embedding interface, transactional migrations, PostgreSQL 16/pgvector Compose service, dependency locks, CI, and local runbook. Nine backend tests passed including real database migration/idempotence and vector-distance checks; frontend type check and production build passed; Ruff passed. Docker startup required its credential helper on PATH. pnpm required explicit approval of the esbuild build script, now recorded in workspace configuration. The test client emits an upstream httpx deprecation warning; tests still pass.
 
 Safety evidence: server-only secret configuration, host restrictions, loopback database binding, no live provider adapter, ignored data and environments. Metric contribution: reproducible plumbing only; accuracy/answer-rate are not measured. Interview explanation: a deterministic fake provider lets failure tests run without cost or model variability, but cannot validate semantic answer quality. Next: T2 ingestion.
+
+## T2 report
+
+Completed upload/status/list/download/delete APIs, bounded isolated PDF extraction, physical-page chunking, metadata page 0, batched fixture embeddings, atomic publication, restart cleanup, and cancellation-safe mutations. Final verification: **33 tests passed** against real PostgreSQL/pgvector, Ruff passed. One upstream test-client deprecation warning remains. Detailed observed challenges and limitations are in CHALLENGES.md; safety evidence is in SAFETY.md. Source PDFs and generated fixtures are not committed. Metric contribution: reliable physical-page identity and prevention of partial indexing; real retrieval/answer accuracy is not measured. Next: T3 citation verification.

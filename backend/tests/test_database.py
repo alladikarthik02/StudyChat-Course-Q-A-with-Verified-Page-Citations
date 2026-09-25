@@ -1,20 +1,7 @@
-import os
-
 import pytest
-from studychat.config import Settings
 from studychat.db import connection, migrate, ready
 
 pytestmark = pytest.mark.integration
-
-
-@pytest.fixture
-def db_settings():
-    url = os.environ.get("STUDYCHAT_TEST_DATABASE_URL")
-    if not url:
-        pytest.skip("Set STUDYCHAT_TEST_DATABASE_URL to a dedicated test database")
-    settings = Settings(database_url=url)
-    migrate(settings)
-    return settings
 
 
 def test_migration_is_idempotent_and_vector_extension_works(db_settings):

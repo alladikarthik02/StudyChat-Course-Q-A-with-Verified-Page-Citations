@@ -5,3 +5,4 @@ pgvector
 pydantic-settings
 python-multipart
 pypdf
+psutil

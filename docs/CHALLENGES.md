@@ -42,3 +42,13 @@ Task/date; observed failure; minimal reproduction; root cause; alternatives cons
 ## T1 — environment and reproducibility
 
 Docker was installed but stopped, and its credential helper was absent from the shell PATH. Started Docker and supplied its bundled executable path; verified real pgvector migration and distance query. pnpm rejected an unapproved esbuild installation script; added the specific esbuild allowance and rebuilt successfully. Locked the same pnpm/Node major versions in CI and the runbook. Neither issue changes retrieval accuracy; both affect whether another developer can reproduce the setup.
+
+## T2 — parsing limits and cancellation
+
+Observed failure: every parser fixture returned `parser_resource_limit`. Running the isolated worker on a generated one-page PDF revealed that macOS rejected `RLIMIT_AS` with `ValueError: current limit exceeds maximum limit` before parsing. Fix: Linux keeps the address-space limit; both platforms use a parent RSS watchdog, and macOS relies on that watchdog plus the wall-clock/CPU deadlines. The watchdog samples every 10 ms and may overshoot between samples; it is not a hard macOS memory guarantee. Regression tests cover memory-watch rejection, parser timeout, child reaping, malformed/encrypted/blank PDFs, page/text limits, and successful parsing.
+
+Review found that cancelling `asyncio.to_thread` does not stop a database transaction. Added `settled_thread` to wait for a mutation to finish before cancellation cleanup, and row-lock/state checks prevent publishing into a deleting document. A regression test holds a mutation open while cancelling and proves cleanup cannot proceed first. Database transactions publish all pages/vectors and readiness together. A failing second embedding batch and invalid database vector leave no partial page index.
+
+The first collection run also caught a Python method named `list` shadowing a subsequent `list[str]` type annotation. Renamed it `list_documents`. After session resumption Docker needed restarting; connectivity failures were treated as test failures, not skipped validation.
+
+Interview explanation: request acceptance is separate from document readiness. A 202 response gives an ID for polling; only the final transaction makes the document ready. UUID-based filenames, bounded parsing, explicit failures, startup recovery, and a single-worker lease prevent partial or interrupted work from masquerading as searchable content.
