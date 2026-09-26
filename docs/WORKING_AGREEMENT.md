@@ -25,3 +25,5 @@ The resume contains measured claims that have not been verified. Build the funct
 User authorized continuous completion of T1 through T3 in the current run, with an explanation, commit, and push at each checkpoint. Pause after T3. Only necessary source, tests, configuration, lockfiles, and relevant documentation may be committed.
 
 User now authorized continuous completion of T4 through T6, with separate tested commits and pushes, explanations at each checkpoint, and a pause after T6.
+
+The user subsequently authorized continuing the entire first project through final handoff (called T9), without pauses between checkpoints. On 2026-09-26 the user authorized selecting coursework PDFs from Downloads, using synthetic questions instead of human-written labels, and configured a local API key. Follow-up explicitly says: keep PDFs local; push code and synthetic questions. Synthetic evidence must be identified as such; do not invent interviews or claim independent human labels. Resume metrics remain measurements to establish, not promises.

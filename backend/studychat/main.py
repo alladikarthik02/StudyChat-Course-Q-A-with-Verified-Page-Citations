@@ -73,7 +73,14 @@ def create_app(
     def public_config():
         return {
             "provider_mode": settings.provider_mode,
-            "chat_model": settings.chat_model,
+            "chat_model": settings.chat_model
+            if settings.provider_mode == "live"
+            else "fixture-extractive-v1",
+            "embedding_model": "text-embedding-3-small"
+            if settings.provider_mode == "live"
+            else "fixture-hash-v1",
+            "similarity_threshold": settings.similarity_threshold,
+            "max_output_tokens": settings.max_output_tokens,
             "threshold_label": settings.threshold_label,
             "transmits_content": settings.provider_mode == "live",
         }

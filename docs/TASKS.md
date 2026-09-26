@@ -1,6 +1,6 @@
 # Implementation tasks and checkpoints
 
-T0–T5 are complete. Each row is a stop-and-explain checkpoint, not authorization to skip the user's requested pause. Tests are written alongside the task they protect.
+T0–T6 are complete. Each row is a stop-and-explain checkpoint, not authorization to skip the user's requested pause. Tests are written alongside the task they protect.
 
 There are **9 tasks total (T0–T8)**: one planning task and eight implementation/validation tasks. At the end of each task, review changes, run appropriate checks, commit, push to the StudyChat repository, report the result, and pause.
 
@@ -12,7 +12,7 @@ There are **9 tasks total (T0–T8)**: one planning task and eight implementatio
 | T3 | Citation parser, normalization, exact/fuzzy verifier, offset mapping | Valid/wrong-page/unknown-doc/Unicode/short-quote/malformed/number-negation tests | Why deterministic quote matching, and where does it fail? | Complete |
 | T4 | Scoped retrieval, threshold gate, OpenAI adapter, prompt contract, SSE lifecycle | Fake-provider streaming/error/cancellation tests; live smoke only with configured credentials; record model snapshot | Why abstain before streaming? Why no midstream retry? | Complete; paid smoke not run (no key) |
 | T5 | Upload/chat UI, provisional states, verified chips, PDF.js viewer/highlights | Browser happy path plus wrong citation, cancellation, XSS and highlight-fallback tests | How do two different PDF text extractors agree? | Complete |
-| T6 | Eval schema, fixture corpus, paired off/on scorer, threshold selection script, provenance manifests | Hand-computed scorer fixtures, split checks, offline repeatability; real labels remain separately tracked | How do you prevent selection bias and denominator gaming? | Pending |
+| T6 | Eval schema, fixture corpus, paired off/on scorer, threshold selection script, provenance manifests | Hand-computed scorer fixtures, split checks, offline repeatability; real labels remain separately tracked | How do you prevent selection bias and denominator gaming? | Complete |
 | T7 | End-to-end hardening and reproducible runbook | Full offline suite, real DB/browser checks, fresh setup, safety matrix evidence | What breaks under failure and concurrent deletion? | Pending |
 | T8 | Human research/corpus evidence, dev tuning, locked live evaluation and truthful resume update | Actual anonymized notes, permitted PDFs, blind gold labels, raw runs, 30-answer spot-check | What do your measured numbers support and not support? | Pending: human evidence required |
 
@@ -78,3 +78,9 @@ Safety: S04/S05/S06/S08/S09/S13/S14 now have service-level tests. Live transmiss
 Built the course library, bounded upload flow, document selection/deletion, consent UI for live transmission, question composer, provisional stream states, cancellation/errors, checked citation chips, and lazy-loaded PDF.js source viewer. The viewer independently maps Unicode text to DOM ranges; ambiguous/missing matches show the quote with a visible fallback. Plain React text rendering prevents model HTML execution. Autoscroll stops when the reader scrolls up; mobile layout is checked.
 
 Validation: 11 frontend unit tests and 7 Chromium browser tests passed, including a real upload → fixture stream → verified page 2 → rendered PDF highlight; production build passed. Visually inspected the rendered result. CI now runs browser tests using generated original PDFs. No PDF binaries, screenshots, browser downloads, node_modules, or build output are committed. Paid live API calls remain untested. Next: T6 evaluation tooling.
+
+## T6 report
+
+Implemented strict dataset/corpus/run schemas, content hashes, paired quote-off/on replay, exact-only diagnostic, denominator-preserving errors, confidence intervals and development-only threshold calibration. Added upload/capture/binding tools and 24 explicitly synthetic coursework questions (8 dev, 16 heldout). PDFs remain ignored locally per user clarification. All 101 backend tests passed, including seven hand-derived evaluation checks; Ruff passed. Newly supplied `.env` exposed test contamination, fixed with automatic isolation from personal configuration.
+
+Live upload was attempted, then a minimal diagnostic received HTTP 429 / insufficient_quota / credit_balance_exhausted. No completed live evaluation or measured course accuracy exists. No further live requests are made until credits are available. Metric contribution: trustworthy paired measurement and a clear distinction between synthetic and human evidence. Interview answer: preserve all questions in the denominator and require both conditional accuracy and answer rate; 100% accuracy on two of six questions does not pass.

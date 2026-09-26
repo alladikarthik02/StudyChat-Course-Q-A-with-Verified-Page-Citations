@@ -38,3 +38,12 @@ def db_settings(tmp_path):
     yield settings
     with connection(settings) as conn:
         conn.execute("TRUNCATE documents CASCADE")
+
+
+@pytest.fixture(autouse=True)
+def isolate_personal_configuration(monkeypatch):
+    """Tests must never consume a developer's API key or live-mode settings."""
+    monkeypatch.setitem(Settings.model_config, "env_file", None)
+    for name in list(os.environ):
+        if name.startswith("STUDYCHAT_") and name != "STUDYCHAT_TEST_DATABASE_URL":
+            monkeypatch.delenv(name)

@@ -78,3 +78,11 @@ The installed PDF.js 6 API rejected the older `isEvalSupported` option during Ty
 Visual inspection caught highlights whose widths did not match the page text. PDF.js 6 requires `--total-scale-factor` and scale-rounding variables on the standalone page container; adding them aligned DOM range geometry with the rendered canvas. Browser tests now assert actual quote highlights and ambiguity fallback. Source offsets from Python are never reused as JavaScript character indexes: the browser normalizes grapheme clusters independently using UTF-16 positions.
 
 The stream decoder rejects sequence gaps, mixed request IDs, truncated UTF-8/events, and missing terminal completion. Final citation chips are applied only after the full stream completes, so a provisional or interrupted answer cannot appear checked. Interview explanation: a successful network response alone is insufficient; completion and verification are separate protocol states that the UI must enforce.
+
+## T6: evaluation denominators and personal configuration
+
+A verifier can appear perfect by removing nearly every citation. The scorer retains missing/error/abstained questions and reports conditional page accuracy alongside coverage and joint success. A six-question hand-derived fixture verifies this behavior. Development-only calibration cannot inspect heldout outcomes.
+
+Adding a real `.env` changed a test that expected missing credentials. Tests now ignore personal dotenv files and remove StudyChat environment overrides, preserving only the dedicated test database URL. This also prevents accidental use of real keys in tests.
+
+The first live coursework ingestion failed; a minimal provider diagnostic established HTTP 429 insufficient_quota with credit_balance_exhausted. The key's presence alone does not establish usable billing. Stopped live requests; coursework metrics remain unmeasured.
