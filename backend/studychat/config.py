@@ -14,12 +14,12 @@ class Settings(BaseSettings):
     provider_mode: Literal["fixture", "live"] = "fixture"
     openai_api_key: SecretStr | None = None
     chat_model: str = Field(
-        default="gpt-4.1-mini-2025-04-14", pattern=r"^gpt-[a-zA-Z0-9.-]+-\d{4}-\d{2}-\d{2}$"
+        default="gpt-5.5-2026-04-23", pattern=r"^gpt-[a-zA-Z0-9.-]+-\d{4}-\d{2}-\d{2}$"
     )
     similarity_threshold: float = Field(default=0.25, ge=-1, le=1, allow_inf_nan=False)
     threshold_label: str = "untuned"
     chat_timeout_seconds: float = Field(default=60, gt=0, le=180)
-    max_output_tokens: int = Field(default=1200, ge=64, le=4000)
+    max_output_tokens: int = Field(default=4000, ge=64, le=4000)
     max_concurrent_chats: int = Field(default=2, ge=1, le=8)
 
     @model_validator(mode="after")

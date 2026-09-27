@@ -119,6 +119,11 @@ class OpenAIProvider:
                     "stream": True,
                     "store": False,
                     "max_output_tokens": self.settings.max_output_tokens,
+                    **(
+                        {"reasoning": {"effort": "low"}}
+                        if self.chat_model == "gpt-5.5-2026-04-23"
+                        else {}
+                    ),
                 },
             ) as response:
                 response.raise_for_status()
