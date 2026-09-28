@@ -121,7 +121,7 @@ class OpenAIProvider:
                     "max_output_tokens": self.settings.max_output_tokens,
                     **(
                         {"reasoning": {"effort": "low"}}
-                        if self.chat_model == "gpt-5.5-2026-04-23"
+                        if self.chat_model == "gpt-5.4-mini-2026-03-17"
                         else {}
                     ),
                 },

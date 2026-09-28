@@ -200,7 +200,7 @@ async def test_openai_adapter_contract_and_completion():
     provider = OpenAIProvider(Settings(provider_mode="live", openai_api_key="dummy"), client)
     assert len((await provider.embed(["hi"]))[0]) == 1536
     assert [t async for t in provider.stream_answer("hi", [])] == ["Hello"]
-    assert calls[1]["store"] is False and calls[1]["model"] == "gpt-5.5-2026-04-23"
+    assert calls[1]["store"] is False and calls[1]["model"] == "gpt-5.4-mini-2026-03-17"
     assert calls[1]["reasoning"] == {"effort": "low"}
     assert calls[1]["max_output_tokens"] == 4000
     assert "tools" not in calls[1]

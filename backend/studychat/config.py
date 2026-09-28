@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     provider_mode: Literal["fixture", "live"] = "fixture"
     openai_api_key: SecretStr | None = None
     chat_model: str = Field(
-        default="gpt-5.5-2026-04-23", pattern=r"^gpt-[a-zA-Z0-9.-]+-\d{4}-\d{2}-\d{2}$"
+        default="gpt-5.4-mini-2026-03-17", pattern=r"^gpt-[a-zA-Z0-9.-]+-\d{4}-\d{2}-\d{2}$"
     )
     similarity_threshold: float = Field(default=0.25, ge=-1, le=1, allow_inf_nan=False)
     threshold_label: str = "untuned"
