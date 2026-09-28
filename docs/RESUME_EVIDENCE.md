@@ -1,16 +1,16 @@
 # Resume alignment and evidence ledger
 
-Source: first project only, Karthik_Alladi_OpenAI_SWE_EmergingTalent_Applied_FullStack.pdf. All statements below are currently unverified claims or planned capabilities.
+Source: first project only, Karthik_Alladi_OpenAI_SWE_EmergingTalent_Applied_FullStack.pdf. The table separates implemented capabilities from measured results and unsupported original claims.
 
 | Resume element | Implementation/evidence needed | Status |
 | --- | --- | --- |
-| End-to-end React and TypeScript app | Running UI and browser test | Pending T1/T5/T7 |
-| Python FastAPI, OpenAI streaming, PostgreSQL/pgvector | Real DB integration, provider adapter, SSE tests and live smoke | Foundation/ingestion tested; live provider and streaming pending T4 |
+| End-to-end React and TypeScript app | Running UI and browser test | Implemented; seven browser tests pass |
+| Python FastAPI, OpenAI streaming, PostgreSQL/pgvector | Real DB integration, provider adapter, SSE tests and live smoke | Implemented; real DB, streaming tests and 32 live development/evaluation requests completed |
 | Eight classmates reported wrong page numbers | Actual anonymized participant notes and accurate summary | Not supplied |
 | 120 questions with hand-checked gold pages | Corpus manifest, permitted PDFs, blind human annotations | Not supplied |
-| About one in four wrong-page citations / 74% baseline | Paired unfiltered scorer output with explicit denominator | Not measured |
-| 90% citation accuracy | Verified-mode output and per-question audit | Not measured |
-| 95% of answerable questions answered | Answer-rate numerator/denominator including errors and abstentions | Not measured |
+| About one in four wrong-page citations / 74% baseline | Paired unfiltered scorer output with explicit denominator | See synthetic results below; original claim not established |
+| 90% citation accuracy | Verified-mode output and per-question audit | See synthetic results below; original claim not established |
+| 95% of answerable questions answered | Answer-rate numerator/denominator including errors and abstentions | See synthetic results below; original claim not established |
 
 Do not round or change denominator definitions to force a match. The “1 in 4” wording is approximate and must agree with the measured baseline. Resume phrasing must explain whether accuracy is among answered questions. Keep reproducible scripts and permitted raw evidence together; do not publish private documents to satisfy that requirement.
 
@@ -37,3 +37,14 @@ Product implementation completion and metric validation are separate statuses. D
 ## Evidence through T3
 
 The React scaffold builds; real pgvector ingestion and internal citation verification pass regression tests. The 81-test suite uses generated fixtures, not the 120-question human-labeled corpus. It therefore establishes implementation behavior, not the resume's empirical accuracy/answer-rate claims. Human interviews, development labels, held-out labels, and live runs are still outstanding.
+
+## Completed synthetic alternative
+
+The user authorized AI-authored coursework questions instead of human-written labels. On a frozen 16-question synthetic evaluation, GPT-5.4 mini achieved 16/16 cited answers (100% answer rate) and 13/16 answers whose displayed pages all matched the labels (81.25%). Off/on quote-verification replay had identical question-level scores. See [full results](EVALUATION_RESULTS.md) and committed aggregate JSON. This does not support the original 74%→90%, 120 hand-labeled questions, or eight-classmate claims.
+
+Suggested truthful resume bullets:
+
+- Built StudyChat with React/TypeScript, FastAPI and PostgreSQL/pgvector, combining PDF ingestion, GPT-5.4 mini streaming answers, deterministic quote verification and a PDF.js source viewer.
+- Developed a reproducible evaluation pipeline; measured 81.25% labeled-page accuracy and 100% cited-answer coverage on 16 held-out synthetic coursework questions, with 110 backend tests and seven browser tests validating implementation behavior.
+
+The second bullet must retain the sample size and synthetic qualification. Citation page matching is not semantic answer correctness. If space is tight, omit the percentages and describe the evaluation tooling instead. No resume PDF was edited.

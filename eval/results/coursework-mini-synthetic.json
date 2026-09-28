@@ -1,0 +1,106 @@
+{
+  "provenance": "AI-authored synthetic coursework evaluation; not independently human-labeled; not an entailment benchmark",
+  "model": "gpt-5.4-mini-2026-03-17",
+  "git_revision": "794b7952957da1420c0673620311f969dd8ec78a",
+  "threshold": -1.0,
+  "questions": 16,
+  "development_questions": 8,
+  "records_sha256": "a9441284078f03212d1daa66df2f9300a6d80a3a910521ce184bf0a6a4171053",
+  "dataset_sha256": "0f66b7c1072f9406146d50cddedfb1d64cfca8b3a5a81f9b97323d4129eb3dd5",
+  "corpus_sha256": "95de2008ad30d7fbcfb6f167e2a01aa7fd03ee085b7d0f2c3e2a55d28b288af4",
+  "calibration_sha256": "e98c21b3237fc8c1471632a713e9ffeb8ae81108f32a94e698ba38d71ff6392b",
+  "prompt_hash": "194b63d11f07c74f81b5021a262e7470066bf6fa0a21135b305bbe22933f76c6",
+  "source_pdfs_published": false,
+  "reports": {
+    "off": {
+      "evidence_kind": "synthetic",
+      "provider_mode": "live",
+      "split": "heldout",
+      "quotes": "off",
+      "exact_only": false,
+      "total": 16,
+      "answered": 16,
+      "correct": 13,
+      "answer_rate": 1.0,
+      "page_accuracy_among_answered": 0.8125,
+      "joint_success": 0.8125,
+      "answer_rate_95pct_interval": [
+        0.8063865817272802,
+        1
+      ],
+      "page_accuracy_95pct_interval": [
+        0.5699064013154177,
+        0.9340852122641324
+      ],
+      "abstentions": 0,
+      "errors": 0,
+      "retrieval_gold_page_recall_at_6": 0.9375,
+      "removed_citations": {},
+      "match_counts": {},
+      "target_met": false
+    },
+    "on": {
+      "evidence_kind": "synthetic",
+      "provider_mode": "live",
+      "split": "heldout",
+      "quotes": "on",
+      "exact_only": false,
+      "total": 16,
+      "answered": 16,
+      "correct": 13,
+      "answer_rate": 1.0,
+      "page_accuracy_among_answered": 0.8125,
+      "joint_success": 0.8125,
+      "answer_rate_95pct_interval": [
+        0.8063865817272802,
+        1
+      ],
+      "page_accuracy_95pct_interval": [
+        0.5699064013154177,
+        0.9340852122641324
+      ],
+      "abstentions": 0,
+      "errors": 0,
+      "retrieval_gold_page_recall_at_6": 0.9375,
+      "removed_citations": {
+        "quote_not_found": 1
+      },
+      "match_counts": {
+        "exact": 37,
+        "approximate": 1
+      },
+      "target_met": false
+    },
+    "exact_only": {
+      "evidence_kind": "synthetic",
+      "provider_mode": "live",
+      "split": "heldout",
+      "quotes": "on",
+      "exact_only": true,
+      "total": 16,
+      "answered": 16,
+      "correct": 13,
+      "answer_rate": 1.0,
+      "page_accuracy_among_answered": 0.8125,
+      "joint_success": 0.8125,
+      "answer_rate_95pct_interval": [
+        0.8063865817272802,
+        1
+      ],
+      "page_accuracy_95pct_interval": [
+        0.5699064013154177,
+        0.9340852122641324
+      ],
+      "abstentions": 0,
+      "errors": 0,
+      "retrieval_gold_page_recall_at_6": 0.9375,
+      "removed_citations": {
+        "quote_not_found": 2
+      },
+      "match_counts": {
+        "exact": 37
+      },
+      "target_met": false
+    }
+  }
+}
