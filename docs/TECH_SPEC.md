@@ -1,6 +1,6 @@
 # StudyChat technical specification
 
-Status: T0–T3 complete: architecture, foundation, ingestion, and citation verification. Retrieval/chat/UI integration remain planned. No answer-quality metrics measured yet.
+Status: T0–T7 implemented and tested. Live synthetic development evaluation is underway; resume metrics are not established.
 
 ## Goal and boundaries
 
@@ -143,3 +143,7 @@ Normalization version is `nfkc-grapheme-dehyphen-ws-v2`. Offsets are Python Unic
 Approximate matching uses RapidFuzz normalized indel ratio, minimum 0.90, over whitespace-token windows of quote token count ±2. It is deliberately bounded and is not exhaustive approximate substring search. A changed number or recognized English negation token is rejected. Other meaning changes remain possible and are explicitly tested. “Exact” means exact after the documented normalization, not byte-identical to the PDF.
 
 Limits: 100,000 answer characters, 100 citations, 2,000 raw/normalized quote characters, six page sources totaling at most 2 million characters, approximate matching only on pages up to 100,000 normalized characters, and 10,000 fuzzy comparisons shared across the answer. Short quotes under 20 normalized characters require exact matching. Resource-limit errors must become a safe terminal chat outcome in T4, never a verified answer. These defaults may reduce answer rate; T6 must count and report their impact before changing them on development data.
+
+## Development-driven retrieval refinement
+
+The first live synthetic development run missed a slide explaining k-hop propagation even though its adjacent overview slide ranked first. Retrieval now keeps four cosine-ranked chunks and reserves up to two slots for the immediately preceding/following physical pages of the highest-ranked hit. Duplicate chunks are skipped and remaining semantic hits fill unused slots, with six chunks maximum. The highest-scoring anchor remains first for threshold gating. Neighboring context is always from the same selected ready document. This changes the original pure top-six retrieval plan; it is evaluated on development questions before freezing heldout configuration.

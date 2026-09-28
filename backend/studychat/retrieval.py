@@ -24,7 +24,7 @@ def retrieve(settings, selected: list[UUID], vector: list[float], model: str):
     validate_embeddings([vector], 1, settings.embedding_dimensions)
     validate_documents(settings, selected, model)
     with connection(settings, vectors=True) as conn:
-        return conn.execute(
+        ranked = conn.execute(
             "SELECT c.document_id,c.page,c.text,c.ordinal,"
             "1-(c.embedding <=> %s::vector) AS similarity "
             "FROM chunks c JOIN documents d ON d.id=c.document_id "
@@ -33,3 +33,28 @@ def retrieve(settings, selected: list[UUID], vector: list[float], model: str):
             "ORDER BY c.embedding <=> %s::vector,c.document_id,c.page,c.ordinal LIMIT 6",
             (vector, selected, model, vector),
         ).fetchall()
+
+        if not ranked:
+            return []
+        # A slide can introduce a concept whose explanation is on its neighbor.
+        # Keep four semantic hits and use at most two slots for neighboring context.
+        anchor = ranked[0]
+        neighbors = conn.execute(
+            "SELECT c.document_id,c.page,c.text,c.ordinal,"
+            "1-(c.embedding <=> %s::vector) AS similarity "
+            "FROM chunks c JOIN documents d ON d.id=c.document_id "
+            "WHERE c.document_id=%s AND c.page=ANY(%s::int[]) "
+            "AND c.kind='page' AND c.page>0 AND d.state='ready' "
+            "AND d.embedding_model=%s "
+            "ORDER BY c.ordinal,c.page LIMIT 2",
+            (vector, anchor["document_id"], [anchor["page"] - 1, anchor["page"] + 1], model),
+        ).fetchall()
+        result, seen = [], set()
+        for row in [*ranked[:4], *neighbors, *ranked[4:]]:
+            key = (row["document_id"], row["page"], row["ordinal"])
+            if key not in seen:
+                seen.add(key)
+                result.append(row)
+            if len(result) == 6:
+                break
+        return result

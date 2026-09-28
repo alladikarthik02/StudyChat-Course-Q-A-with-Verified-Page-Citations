@@ -1,25 +1,25 @@
 # Safety requirements and evidence
 
-Requirements are tracked individually below. T1–T3 have tested evidence; later chat/UI/evaluation controls remain pending. Each implementation task must update the evidence column with actual test names/results and remaining limitations.
+Requirements are tracked individually below. T1–T7 implementation controls have automated evidence; semantic answer correctness and independent human evaluation remain separate limitations. Each implementation task must update the evidence column with actual test names/results and remaining limitations.
 
 | ID | Invariant / indicator | Planned verification | Evidence |
 | --- | --- | --- | --- |
-| S01 | Provider key stays server-side; no secrets in logs, frontend bundles, commits, or model context | Secret sentinel tests; ignored .env; bundle/config review | Pending |
-| S02 | Upload byte/page/text/time/concurrency limits are enforced | Boundary, corrupt PDF, parser timeout and cleanup tests | Pending |
-| S03 | User filenames and IDs cannot access arbitrary files | Traversal and unknown-ID API tests | Pending |
-| S04 | Only selected ready documents enter retrieval, prompts, and citations | Two-document same-page tests; readiness and deletion races | Pending |
-| S05 | PDF text/metadata/model output are untrusted; no tools execute document instructions | Fenced prompt assertions; metadata excluded; escaped rendering tests | Pending |
-| S06 | No verified chip appears before server verification | Event lifecycle and browser tests | Pending |
-| S07 | Verification means quote match, not truth; approximate matches are labeled | Exact/fuzzy/negation tests; UI wording review | Pending |
-| S08 | Weak retrieval abstains before first answer token | Threshold and empty-retrieval tests | Pending |
-| S09 | Streams end clearly; disconnects release resources; no silent midstream retry | Cancellation, provider failure and event-order tests | Pending |
-| S10 | Partial ingestion is never queryable; delete removes source and derived data | DB failure, restart cleanup, file and vector deletion tests | Pending |
-| S11 | Local service binds loopback; public use is unsupported without auth | Compose/host/CORS/origin configuration checks | Pending |
-| S12 | No raw PDF/question/answer content in routine logs | Sentinel logging tests; opt-in local eval artifacts only | Pending |
-| S13 | Live provider transmission is explained; fixtures send no content | Mode/config/UI tests; provider spy | Pending |
-| S14 | Bounded requests control accidental cost | Input/output caps, concurrency and timeout tests | Pending |
-| S15 | Metrics cannot reward withholding every answer or omit failures | Zero-answer/all-failure fixtures; raw denominator assertions | Pending |
-| S16 | Gold labels and measured resume claims are not invented | Evidence manifest and human-label provenance review | Pending |
+| S01 | Provider key stays server-side; no secrets in logs, frontend bundles, commits, or model context | Secret sentinel tests; ignored .env; bundle/config review | Config/health sentinel tests and ignored .env; test suite isolates personal keys. |
+| S02 | Upload byte/page/text/time/concurrency limits are enforced | Boundary, corrupt PDF, parser timeout and cleanup tests | Extraction, ingestion and request-guard boundary/timeout/concurrency tests pass. |
+| S03 | User filenames and IDs cannot access arbitrary files | Traversal and unknown-ID API tests | UUID/path and filename sanitization tests pass. |
+| S04 | Only selected ready documents enter retrieval, prompts, and citations | Two-document same-page tests; readiness and deletion races | Selected-document, model-mismatch, neighbor-scope and deleted-source tests pass. |
+| S05 | PDF text/metadata/model output are untrusted; no tools execute document instructions | Fenced prompt assertions; metadata excluded; escaped rendering tests | No model tools; metadata excluded; browser HTML/XSS test passes. Prompt injection resistance is not guaranteed. |
+| S06 | No verified chip appears before server verification | Event lifecycle and browser tests | Browser incomplete/cancelled stream tests pass. |
+| S07 | Verification means quote match, not truth; approximate matches are labeled | Exact/fuzzy/negation tests; UI wording review | Exact/fuzzy, numerical/negation and semantic-counterexample tests pass; truth is not verified. |
+| S08 | Weak retrieval abstains before first answer token | Threshold and empty-retrieval tests | Pre-delta abstention test passes; threshold needs dataset-specific calibration. |
+| S09 | Streams end clearly; disconnects release resources; no silent midstream retry | Cancellation, provider failure and event-order tests | Provider failure/cancellation/EOF tests and strict evaluation-capture tests pass. |
+| S10 | Partial ingestion is never queryable; delete removes source and derived data | DB failure, restart cleanup, file and vector deletion tests | Atomic publication, deletion and restart recovery integration tests pass. |
+| S11 | Local service binds loopback; public use is unsupported without auth | Compose/host/CORS/origin configuration checks | Loopback configuration, host/origin guards and ownership checks; local single-user only. |
+| S12 | No raw PDF/question/answer content in routine logs | Sentinel logging tests; opt-in local eval artifacts only | Provider bodies replaced by safe codes; routine access logs contain paths/status, not request content. Private eval outputs are opt-in. |
+| S13 | Live provider transmission is explained; fixtures send no content | Mode/config/UI tests; provider spy | Live consent and fixture isolation tests pass; actual authorized embedding/dev capture succeeded. |
+| S14 | Bounded requests control accidental cost | Input/output caps, concurrency and timeout tests | Question/output/concurrency/time limits tested; token caps are not an account spending limit. |
+| S15 | Metrics cannot reward withholding every answer or omit failures | Zero-answer/all-failure fixtures; raw denominator assertions | Hand-derived paired metrics, missing/zero-answer and heldout-isolation tests pass. |
+| S16 | Gold labels and measured resume claims are not invented | Evidence manifest and human-label provenance review | Synthetic labels explicit; official mode rejects them. No interviews or human labels claimed. |
 
 Prompt fencing reduces risk but is not a guarantee against prompt injection. The first project exposes no model tools, credentials, or cross-user data. Dedicated attack generation and classifiers belong to project 3. Uploaded PDFs remain untrusted even when a quote matches them.
 

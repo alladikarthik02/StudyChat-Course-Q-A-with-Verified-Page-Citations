@@ -86,3 +86,9 @@ A verifier can appear perfect by removing nearly every citation. The scorer reta
 Adding a real `.env` changed a test that expected missing credentials. Tests now ignore personal dotenv files and remove StudyChat environment overrides, preserving only the dedicated test database URL. This also prevents accidental use of real keys in tests.
 
 The first live coursework ingestion failed; a minimal provider diagnostic established HTTP 429 insufficient_quota with credit_balance_exhausted. The key's presence alone does not establish usable billing. Stopped live requests; coursework metrics remain unmeasured.
+
+## T7: real model output exposed integration gaps
+
+Eight GPT-5.4 mini development requests completed, but grouped citations and a paraphrased quote reduced answer coverage. The prompt now shows separate bracket pairs and forbids quote abbreviation. One retrieval miss came from splitting an explanation across adjacent slides. Reserving two of six context slots for neighbors of the best semantic hit restores local context while preserving selected-document scope and a bounded prompt. A dedicated database test checks neighbor inclusion and cross-document exclusion.
+
+The capture client now rejects unknown events, post-final deltas, inconsistent final outcomes and model/threshold drift. Seven mock-stream tests cover these failure modes. Browser tests and clean GitHub CI validate the build independently of local dependencies. An old server survived Docker shutdown and held the storage lock; stopping the old process resolved startup without deleting source files.

@@ -26,3 +26,5 @@ Corpus and run artifacts are hash-bound. Keep corpus snapshots and raw outputs p
 5. Replay `--quotes off` and `--quotes on` against the same heldout records. Publish both rates and sample counts regardless of success. Do not tune on heldout outcomes; changes require a new evaluation set.
 
 A budget/credential/provider failure is a failed run, not evidence that the model answered. Partial captures without a finished manifest are retained privately and cannot be presented as a completed evaluation. No synthetic interview notes should be represented as participant research.
+
+If no development threshold meets both targets, calibration maximizes joint success, then answer rate, and uses the lowest threshold for an exact tie. This avoids additional abstentions unsupported by observed development benefit. A selected threshold of -1 disables similarity rejection for nonempty context; unsupported-answer abstention still depends on generation. It is a dataset-specific selection, not a universal safety threshold.

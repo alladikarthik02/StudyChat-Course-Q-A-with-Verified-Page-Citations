@@ -77,3 +77,10 @@ def test_artifact_tampering_rejected(bundle, tmp_path):
 
 def test_exact_only_replays_same_records(bundle):
     assert score(bundle, "heldout", "on", exact_only=True)["correct"] == 2
+
+
+def test_infeasible_calibration_prefers_coverage_without_extra_gating(bundle):
+    bundle.records["dev-b"].answer = "Uncited answer"
+    result = calibrate(bundle)
+    assert not result["target_met_on_dev"]
+    assert result["selected_threshold"] == -1

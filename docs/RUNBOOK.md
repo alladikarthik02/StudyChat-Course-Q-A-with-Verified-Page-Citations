@@ -20,7 +20,7 @@ pnpm dev
 
 Open http://127.0.0.1:5173. The frontend proxies `/api` to the local API. Health is at http://127.0.0.1:8000/health, readiness at `/ready`, and API documentation at `/docs`. Readiness is false until migrations succeed.
 
-Configuration uses `STUDYCHAT_` environment variables or a local `.env` based on `.env.example`. The example database password is only for the loopback-bound development database. No provider key is needed: only fixture mode is implemented through T3. Fixture embeddings test storage and plumbing, not semantic retrieval quality.
+Configuration uses `STUDYCHAT_` environment variables or a local `.env` based on `.env.example`. The example database password is only for the loopback-bound development database. No provider key is needed for fixture mode. Live mode is optional. Fixture embeddings test storage and plumbing, not semantic retrieval quality.
 
 ## Checks
 
@@ -33,7 +33,7 @@ docker compose exec -T db createdb -U studychat studychat_test
 Then:
 
 ```sh
-.venv/bin/ruff check backend
+.venv/bin/ruff check backend eval scripts
 STUDYCHAT_TEST_DATABASE_URL=postgresql://studychat:local-studychat@127.0.0.1:54329/studychat_test .venv/bin/pytest -q
 cd frontend
 pnpm build
@@ -55,21 +55,21 @@ Backend runtime and development locks are generated with pip-tools 7.6.1 from th
 
 ## PDF API (T2)
 
-Upload one PDF using multipart field `file` to `POST /documents`. A 202 response returns its ID; poll `GET /documents/{id}` until `ready` or `failed`. `GET /documents` lists state, `GET /documents/{id}/file` serves ready PDFs, and `DELETE /documents/{id}` removes the source plus derived rows. The upload UI is scheduled for T5; use `/docs` to exercise the API now.
+Upload one PDF using multipart field `file` to `POST /documents`. A 202 response returns its ID; poll `GET /documents/{id}` until `ready` or `failed`. `GET /documents` lists state, `GET /documents/{id}/file` serves ready PDFs, and `DELETE /documents/{id}` removes the source plus derived rows. The browser UI supports these operations; `/docs` also exposes the API.
 
 Only one ingestion runs at a time; overlapping uploads return 429. Malformed, encrypted, empty-text, oversized, and over-limit PDFs fail with safe codes. Raw request size is bounded before multipart parsing, with a 64 KiB multipart allowance. Parser limits default to 60 seconds and 512 MiB. Linux enforces an address-space limit; macOS uses a 10 ms RSS watchdog with possible sampling overshoot. CPU time is also bounded. Uploaded files are mode 0600 in a private directory.
 
 Startup acquires both storage and database ownership, recovers interrupted jobs, retries pending deletes, and removes staging/orphan files. Run one API worker. If the database was unavailable at startup, migrate/restore it and restart the API. Windows native parsing is not supported; use Linux or macOS. No deduplication is currently applied: reuploads get a new ID so failed attempts remain retryable.
 
-[pypdf extraction limitations](https://pypdf.readthedocs.io/en/stable/user/extract-text.html) informed the isolated-parser design. This project handles text PDFs; OCR and browser highlighting arrive outside this checkpoint.
+[pypdf extraction limitations](https://pypdf.readthedocs.io/en/stable/user/extract-text.html) informed the isolated-parser design. This project handles text PDFs; OCR is not implemented; the browser highlights uniquely mapped text.
 
 ## Citation verification (T3)
 
-`studychat.citations.verify_answer` consumes an answer, server-owned alias-to-document UUID mapping, and `PageSource` records from `DocumentRepository.citation_pages(selected_ids, retrieved_pages)`. It returns exact/approximate/removed statuses, reasons, scores, source spans, a rendered text with invalid citations replaced, and whether any citations survived. The text remains untrusted and must be escaped by T5's UI.
+`studychat.citations.verify_answer` consumes an answer, server-owned alias-to-document UUID mapping, and `PageSource` records from `DocumentRepository.citation_pages(selected_ids, retrieved_pages)`. It returns exact/approximate/removed statuses, reasons, scores, source spans, a rendered text with invalid citations replaced, and whether any citations survived. The UI renders untrusted text through React escaping.
 
 Use `[D1 p.2 "exact quote"]`; the quote string uses JSON escaping. Unknown aliases, metadata page 0, pages outside context, and malformed references cannot become verified citations. Pass `allow_fuzzy=False` for exact-only sensitivity runs. The default fuzzy score is a normalized indel ratio, not a probability of correctness. See [RapidFuzz's ratio definition](https://rapidfuzz.github.io/RapidFuzz/Usage/fuzz.html#ratio).
 
-Run `pytest backend/tests/test_citations.py` with the project environment to exercise the 46 pure verifier tests. The full suite also tests real PDF ingestion through database-backed page selection into the verifier. Streaming integration is intentionally deferred to T4; there is no working chat endpoint yet.
+Run `pytest backend/tests/test_citations.py` with the project environment to exercise the 46 pure verifier tests. The full suite also tests real PDF ingestion through database-backed page selection into the verifier. The chat endpoint verifies completed streams before exposing final citation chips.
 
 ## Chat and live mode (T4)
 
@@ -79,7 +79,7 @@ Live mode is opt-in via `STUDYCHAT_PROVIDER_MODE=live` and a server-only `STUDYC
 
 The adapter uses Responses streaming with `store: false`, no tools, a 1,200-token output cap, and pinned `gpt-4.1-mini-2025-04-14`; embeddings use `text-embedding-3-small` at 1,536 dimensions. Source references: [model snapshot](https://developers.openai.com/api/docs/models/gpt-4.1-mini), [streaming events](https://developers.openai.com/api/docs/guides/streaming-responses), [embeddings](https://developers.openai.com/api/docs/guides/embeddings). A pinned model does not make generation perfectly deterministic.
 
-No local API credentials were supplied, so live paid calls have not been run. Mocked HTTP contract tests verify request fields, deltas, completion, disconnects, 429/500 errors, and no retry. `/config` reports mode and transmission requirements without secrets.
+A key is configured locally. The first live attempt on 2026-09-26 failed with credit_balance_exhausted; no successful live evaluation exists. Mocked HTTP contract tests verify request fields, deltas, completion, disconnects, 429/500 errors, and no retry. `/config` reports mode and transmission requirements without secrets.
 
 ## Browser experience and tests (T5)
 
@@ -99,3 +99,7 @@ STUDYCHAT_TEST_DATABASE_URL=postgresql://studychat:local-studychat@127.0.0.1:543
 ```
 
 Browser tests start their own fixture API and Vite servers (ports 8000/5173 must be free), require a dedicated `_test` database, and delete test documents between cases. They use a temporary storage directory. Generated screenshots and PDFs stay under ignored `tmp/` or test-results. `STUDYCHAT_PYTHON=python` selects an alternative interpreter for CI. PDF.js code is loaded only when a source is opened.
+
+## Evaluation and billing troubleshooting
+
+Follow [EVALUATION.md](EVALUATION.md) for paired scoring and frozen development calibration. Synthetic coursework questions are in `eval/coursework`; source PDFs and raw outputs stay in ignored `eval/private`. Do not commit `.env` or provider responses. A key can be configured while the API account has no usable credits. HTTP 429 `credit_balance_exhausted` requires resolving API billing before another live attempt; repeatedly retrying cannot fix it. Fixture mode remains available without a key. Restart after changing configuration.

@@ -332,7 +332,7 @@ def calibrate(bundle: Bundle):
     chosen = (
         max(feasible, key=lambda t: t["threshold"])
         if feasible
-        else max(trials, key=lambda t: (t["joint_success"], t["answer_rate"], t["threshold"]))
+        else max(trials, key=lambda t: (t["joint_success"], t["answer_rate"], -t["threshold"]))
     )
     return {
         "selected_threshold": chosen["threshold"],

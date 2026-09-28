@@ -270,3 +270,31 @@ def test_no_surviving_citations_is_not_an_answered_outcome(db_settings, pdf_byte
         )
         assert output[-1]["outcome"] == "no_verified_citations"
         assert output[-2]["result"]["has_verified_citations"] is False
+
+
+@pytest.mark.integration
+async def test_retrieval_reserves_neighbor_context_without_crossing_documents(
+    db_settings, pdf_bytes
+):
+    from studychat.db import connection
+
+    with TestClient(create_app(db_settings)) as client:
+        doc_id = UUID(upload(client, pdf_bytes(tuple(f"page {i} content" for i in range(1, 10)))))
+        wait_document(client, doc_id)
+        other_id = UUID(upload(client, pdf_bytes(("unselected document",))))
+        wait_document(client, other_id)
+        vector = [1.0] + [0.0] * 1535
+        with connection(db_settings, vectors=True) as conn:
+            for page in range(1, 10):
+                # Anchor at page 5; page 4 is deliberately a poor semantic match.
+                similarity = {5: 1.0, 1: 0.9, 2: 0.8, 8: 0.7, 9: 0.6}.get(page, 0.1)
+                embedding = [similarity, (1 - similarity**2) ** 0.5] + [0.0] * 1534
+                conn.execute(
+                    "UPDATE chunks SET embedding=%s::vector WHERE document_id=%s AND page=%s",
+                    (embedding, doc_id, page),
+                )
+        rows = retrieve(db_settings, [doc_id], vector, "fixture-hash-v1")
+        assert len(rows) == 6
+        assert rows[0]["page"] == 5
+        assert {4, 6} <= {r["page"] for r in rows}
+        assert all(r["document_id"] == doc_id and r["page"] > 0 for r in rows)

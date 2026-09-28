@@ -24,7 +24,7 @@ from studychat.prompt import PROMPT_HASH  # noqa: E402
 from studychat.text import NORMALIZATION_VERSION  # noqa: E402
 
 
-def capture(client, question, live_consent):
+def capture(client, question, live_consent, expected_config=None):
     record = {
         "question_id": question.id,
         "outcome": "error",
@@ -63,8 +63,18 @@ def capture(client, question, live_consent):
                 kind = event["event"]
                 if seq == 1 and kind != "start":
                     raise ValueError("missing_start")
-                if kind == "start" and event.get("prompt_hash") != PROMPT_HASH:
-                    raise ValueError("prompt_version_mismatch")
+                if kind not in {"start", "delta", "verification", "abstain", "error", "done"}:
+                    raise ValueError("unknown_event")
+                if kind == "start":
+                    if seq != 1 or event.get("prompt_hash") != PROMPT_HASH:
+                        raise ValueError("invalid_start")
+                    if expected_config and (
+                        event.get("model") != expected_config["chat_model"]
+                        or event.get("threshold") != expected_config["similarity_threshold"]
+                    ):
+                        raise ValueError("configuration_changed")
+                if final_kind and kind != "done":
+                    raise ValueError("event_after_final_state")
                 if kind == "delta":
                     record["answer"] += event["text"]
                     if len(record["answer"]) > 100000:
@@ -79,8 +89,13 @@ def capture(client, question, live_consent):
                 if kind == "error":
                     record["error_code"] = event.get("code", "stream_error")
                 if kind == "done":
-                    if final_kind is None:
-                        raise ValueError("missing_final_state")
+                    allowed = {
+                        "verification": {"answered", "no_verified_citations"},
+                        "abstain": {"abstained"},
+                        "error": {"error"},
+                    }
+                    if event.get("outcome") not in allowed.get(final_kind, set()):
+                        raise ValueError("inconsistent_final_state")
                     terminal = True
                     outcome = event["outcome"]
                     record["outcome"] = (
@@ -158,7 +173,7 @@ def main():
         records_path = args.output_dir / "records.jsonl"
         with records_path.open("x") as file:
             for question in selected:
-                record = capture(client, question, args.live_consent)
+                record = capture(client, question, args.live_consent, config)
                 file.write(json.dumps(record) + "\n")
                 file.flush()
                 print(f"{question.id}: {record['outcome']}")
