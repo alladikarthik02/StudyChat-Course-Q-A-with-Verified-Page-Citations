@@ -2,11 +2,11 @@
 
 Course PDF question answering with streaming answers and verified page citations.
 
-Status: **T0–T5 complete**. Upload PDFs, select sources, ask questions, and open checked citations in the PDF viewer. Fixture mode works offline; the live adapter is mock-tested but has not made a paid call.
+Status: **Implementation and synthetic evaluation complete (T0–T8), with final handoff (T9).** Upload PDFs, select sources, ask questions, and open checked citations in the PDF viewer. Live answers use GPT-5.4 mini; fixture mode works offline.
 
-Validation: 94 backend tests, 11 frontend unit tests, 7 browser tests, and production build pass. Resume metrics remain unmeasured.
+Validation: 110 backend tests, 11 frontend unit tests, seven browser tests, and production build pass. A frozen 16-question synthetic live evaluation measured **81.25% labeled-page accuracy and 100% cited-answer rate**. The 90% accuracy target remains unmet; no independent human study or 74%→90% improvement is claimed. See [results and limitations](docs/EVALUATION_RESULTS.md).
 
-See [local setup and checks](docs/RUNBOOK.md).
+See [final handoff](docs/HANDOFF.md), [local setup and checks](docs/RUNBOOK.md), and [interview preparation](docs/INTERVIEW_GUIDE.md).
 
 Repository identified from the resume: https://github.com/alladikarthik02/StudyChat-Course-Q-A-with-Verified-Page-Citations
 The remote was empty at initial inspection. Completed task checkpoints are committed and pushed separately.

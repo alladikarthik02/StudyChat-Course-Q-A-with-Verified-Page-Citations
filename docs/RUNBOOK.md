@@ -77,9 +77,9 @@ Run `pytest backend/tests/test_citations.py` with the project environment to exe
 
 Live mode is opt-in via `STUDYCHAT_PROVIDER_MODE=live` and a server-only `STUDYCHAT_OPENAI_API_KEY`. Uploads additionally require header `X-StudyChat-Consent: yes`; chat requests require `live_consent: true`. This sends extracted text/questions to OpenAI. Fixture and live embeddings cannot be mixed: reupload documents after switching modes. The API rejects selected documents with an incompatible embedding model.
 
-The adapter uses Responses streaming with `store: false`, no tools, a 1,200-token output cap, and pinned `gpt-4.1-mini-2025-04-14`; embeddings use `text-embedding-3-small` at 1,536 dimensions. Source references: [model snapshot](https://developers.openai.com/api/docs/models/gpt-4.1-mini), [streaming events](https://developers.openai.com/api/docs/guides/streaming-responses), [embeddings](https://developers.openai.com/api/docs/guides/embeddings). A pinned model does not make generation perfectly deterministic.
+The adapter uses Responses streaming with `store: false`, no tools, a 4,000-token total output cap, low reasoning effort, and pinned `gpt-5.4-mini-2026-03-17`; embeddings use `text-embedding-3-small` at 1,536 dimensions. Source references: [model snapshot](https://developers.openai.com/api/docs/models/gpt-5.4-mini), [streaming events](https://developers.openai.com/api/docs/guides/streaming-responses), [embeddings](https://developers.openai.com/api/docs/guides/embeddings). A pinned model does not make generation perfectly deterministic.
 
-A key is configured locally. The first live attempt on 2026-09-26 failed with credit_balance_exhausted; no successful live evaluation exists. Mocked HTTP contract tests verify request fields, deltas, completion, disconnects, 429/500 errors, and no retry. `/config` reports mode and transmission requirements without secrets.
+A key is configured locally. After API credits were added, PDF embeddings and 32 development/evaluation requests succeeded. See EVALUATION_RESULTS.md for the frozen synthetic results. Mocked HTTP contract tests verify request fields, deltas, completion, disconnects, 429/500 errors, and no retry. `/config` reports mode and transmission requirements without secrets.
 
 ## Browser experience and tests (T5)
 

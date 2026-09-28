@@ -1,6 +1,6 @@
 # StudyChat technical specification
 
-Status: T0–T7 implemented and tested. Live synthetic development evaluation is underway; resume metrics are not established.
+Status: T0–T7 implemented and tested. Live synthetic evaluation completed: 13/16 correct labeled-page answers and 16/16 cited answers. Original human-study resume claims remain unsupported.
 
 ## Goal and boundaries
 
