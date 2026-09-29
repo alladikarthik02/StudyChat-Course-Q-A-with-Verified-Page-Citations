@@ -1,10 +1,10 @@
 # StudyChat technical specification
 
-Status: T0–T7 implemented and tested. Live synthetic evaluation completed: 13/16 correct labeled-page answers and 16/16 cited answers. Original human-study resume claims remain unsupported.
+Status: personal learning project implemented and tested. Frozen synthetic evaluations are reported in EVALUATION_RESULTS.md.
 
 ## Goal and boundaries
 
-Let a student upload course PDFs, ask a question, watch an answer stream, and open the exact PDF page for a verified quotation. Match the first resume project's functional scope: React/TypeScript, Python FastAPI, OpenAI API, PostgreSQL/pgvector, streaming, and a reproducible citation evaluation.
+Let a student upload course PDFs, ask a question, watch an answer stream, and open the exact PDF page for a verified quotation. Explore this stack: React/TypeScript, Python FastAPI, OpenAI API, PostgreSQL/pgvector, streaming, and a reproducible citation evaluation.
 
 Initial deployment is a single-user local application bound to loopback. Public hosting and multi-user accounts are out of scope; they require authentication, per-owner access checks, and a separate deployment review. Support text PDFs first. Scans produce an explicit unsupported/no-extractable-text result; OCR is not silently simulated.
 
@@ -42,7 +42,7 @@ flowchart LR
   U --> PV[PDF.js page viewer]
 ```
 
-FastAPI owns secrets, storage access, retrieval, citation verification, and request limits. The browser never receives the provider key. Provider calls use explicit timeouts and output limits. A provider interface supports deterministic fixtures and a live OpenAI adapter. Fixture mode is visibly labeled and cannot produce resume benchmark evidence.
+FastAPI owns secrets, storage access, retrieval, citation verification, and request limits. The browser never receives the provider key. Provider calls use explicit timeouts and output limits. A provider interface supports deterministic fixtures and a live OpenAI adapter. Fixture mode is visibly labeled and cannot produce project benchmark evidence.
 
 Use an ingestion subprocess with memory/time limits for untrusted PDFs. The API orchestrates its lifecycle and cleans up partial work. A durable external queue is unnecessary for this local version: on startup, mark interrupted pending jobs failed and allow retry. Do not leave documents indefinitely “processing.”
 
@@ -103,22 +103,22 @@ The backend sends physical page, quote, match type, score, and source offsets. P
 
 ## Evaluation and reproducibility
 
-Separate a 20-question development split from 120 answerable held-out questions across approximately 30 permitted course PDFs. Gold document/page pairs must be labeled from PDFs before system output is inspected. Keep development and held-out question IDs disjoint; record corpus hashes, provenance, and duplicate/leakage checks. Human labels and classmate interviews cannot be fabricated.
+Keep development and heldout questions separate. The first synthetic dataset has 8 development and 16 heldout questions across two permitted PDFs; the second has 5 development and 20 heldout questions from a different chapter. Gold document/page pairs must be labeled from PDFs before system output is inspected. Keep development and held-out question IDs disjoint; record corpus hashes, provenance, and duplicate/leakage checks. Human labels and classmate interviews cannot be fabricated.
 
 `eval/cite_eval.py --quotes off|on` is the planned interface. Generate once per question and save raw output, retrieval, and parsed citations. Apply both verification modes to those same outputs for the primary paired comparison; an independent-generation experiment must be labeled separately. Neither mode can count zero-citation outputs as correct.
 
-- Answer rate = questions with a completed answer and at least one surviving citation / all 120 answerable questions.
+- Answer rate = questions with a completed answer and at least one surviving citation / all questions in the evaluated split.
 - Page accuracy among answered = answered questions whose every displayed citation `(document_id, physical_page)` is in the gold set / answered questions.
-- Joint success = correctly cited answered questions / all 120 questions.
+- Joint success = correctly cited answered questions / all questions in the evaluated split.
 - Also print raw counts, abstentions, provider failures, removed citations, exact/approximate counts, and per-question outcomes. Failures stay in denominators. Use “N/A” when the answered denominator is zero.
 
-This measures page correctness, not whether all necessary pages were cited or the answer entailed the source. Report that limitation. Add adversarial/unanswerable smoke questions separately; do not silently change the 120-question answer-rate denominator.
+This measures page correctness, not whether all necessary pages were cited or the answer entailed the source. Report that limitation. Add adversarial/unanswerable smoke questions separately; do not silently change the fixed answer-rate denominator.
 
 Freeze the development threshold before held-out scoring. Record selected model snapshot, embedding model, prompt hash, package locks, normalization version, configuration, random settings, git revision, PDF hashes, timestamps, and raw responses. Cached replay makes scoring reproducible; live model generations are not guaranteed identical. Pin the exact available model snapshot during adapter implementation after consulting current official documentation; no floating production alias as a substitute for a recorded snapshot.
 
-Resume values (74%, 90%, 95%, 1 in 4, 8 classmates) are claims to validate, not acceptance thresholds to force. If observed evidence differs, revise the resume.
+Report observed results without forcing a target value. Synthetic evidence does not establish human-study findings.
 
-Engineering performance objectives are simultaneously >=90% verified page accuracy among answered questions and >=95% answer rate. Every task maps to these objectives in TASKS.md; RESUME_EVIDENCE.md defines the diagnostic and improvement policy. Passing functional tests does not establish these empirical results. The baseline is measured without deliberate degradation, and tuning must not consume the held-out set.
+Engineering performance objectives are simultaneously >=90% verified page accuracy among answered questions and >=95% answer rate. Every task maps to these objectives in TASKS.md; PROJECT_EVIDENCE.md defines the diagnostic and improvement policy. Passing functional tests does not establish these empirical results. The baseline is measured without deliberate degradation, and tuning must not consume the held-out set.
 
 ## Testing and acceptance
 
@@ -132,7 +132,7 @@ Browser tests: upload → ready → ask → provisional stream → verification 
 
 Evaluation tests: hand-calculated fixtures for every metric, duplicates, missing gold pages, wrong-document same-page citations, zero answers, provider errors, paired off/on comparison, and non-finite scores.
 
-Completion requires a fresh-checkout runbook, locked dependencies, passing offline unit/integration/browser checks, safe fixture demo, and clearly separated live evaluation status. A functioning product may precede human evidence; the resume claims remain unverified until that evidence exists.
+Completion requires a fresh-checkout runbook, locked dependencies, passing offline unit/integration/browser checks, safe fixture demo, and clearly separated live evaluation status. A functioning product may precede human evidence; the project claims remain unverified until that evidence exists.
 
 ## T3 implementation decisions
 
@@ -146,7 +146,7 @@ Limits: 100,000 answer characters, 100 citations, 2,000 raw/normalized quote cha
 
 ## Development-driven retrieval refinement
 
-The first live synthetic development run missed a slide explaining k-hop propagation even though its adjacent overview slide ranked first. Retrieval now keeps four cosine-ranked chunks and reserves up to two slots for the immediately preceding/following physical pages of the highest-ranked hit. Duplicate chunks are skipped and remaining semantic hits fill unused slots, with six chunks maximum. The highest-scoring anchor remains first for threshold gating. Neighboring context is always from the same selected ready document. This changes the original pure top-six retrieval plan; it is evaluated on development questions before freezing heldout configuration.
+The first live synthetic development run missed a slide explaining k-hop propagation even though its adjacent overview slide ranked first. Retrieval now keeps four cosine-ranked chunks and reserves up to two slots for the immediately preceding/following physical pages of the highest-ranked hit. Duplicate chunks are skipped and remaining semantic hits fill unused slots, with six chunks maximum. This was the T7 strategy, superseded by R1 below. Neighboring context is always from the same selected ready document. This changes the original pure top-six retrieval plan; it is evaluated on development questions before freezing heldout configuration.
 
 ## Post-handoff hybrid retrieval (R1)
 

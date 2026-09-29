@@ -283,7 +283,7 @@ def score(bundle: Bundle, split: str, quotes: str, *, exact_only=False, threshol
 
 def require_official_evidence(bundle: Bundle):
     if bundle.corpus.kind != "human" or bundle.manifest.mode != "live":
-        raise ValueError("fixture_results_are_not_resume_evidence")
+        raise ValueError("fixture_results_are_not_live_evidence")
     counts = Counter(q.split for q in bundle.questions)
     if counts != {"dev": 20, "heldout": 120}:
         raise ValueError("official_dataset_requires_20_dev_and_120_heldout")

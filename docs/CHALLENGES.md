@@ -7,7 +7,7 @@ Distinguish anticipated risks from failures actually encountered. T0 contains de
 | Finding | Why it matters | Decision / unresolved tradeoff |
 | --- | --- | --- |
 | GitHub URL was not visible in the message | Risk of selecting the wrong repository | Extracted StudyChat hyperlink from PDF annotations; remote inspection returned no refs |
-| Resume metrics and eight interviews have no supporting artifacts | A build cannot establish historical claims | Track each as unverified; collect evidence and use actual measurements |
+| Quality goals require empirical evidence | Passing tests cannot establish answer quality | Use frozen synthetic evaluations and publish actual measurements |
 | `[p.N]` is ambiguous across PDFs | Correct page number can point to the wrong document | Use server-resolved document aliases plus physical page numbers |
 | Post-stream verification occurs after the user sees text | Unverified content could look authoritative | Mark all streamed text provisional; final server result controls chips |
 | Exact quotation is not entailment | A misleading answer can quote real text | Label quote status only; document semantic correctness outside metric scope |
@@ -98,3 +98,7 @@ The capture client now rejects unknown events, post-final deltas, inconsistent f
 The original recurrent-weight failure retrieved overview slides instead of the equation. A simple lexical OR search favored short generic slides. IDF-weighted stemmed terms plus a 32-candidate relevance pass recovered pages 92/93; the selector chose page 92 in a diagnostic. This diagnostic is development evidence, not a revised holdout score.
 
 A fresh cloud-computing chapter produced five completed development answers, four passing frozen page labels. The fifth described Domain 0 using additional relevant pages 23 and 36 outside its labels (12/13). The score remains 4/5: changing labels after outputs would hide annotation limitations. GPT-5.4 mini stays selected because this failure does not establish a model-capability bottleneck. The user authorized GPT-5.5 if needed, but higher cost alone cannot fix incomplete labels.
+
+## R2: evaluate without relabeling the outcome
+
+The fresh cloud benchmark completed all 20 questions and passed 19 page checks. The failed answer cited page 32, which directly describes memory precopy but was missing from the prewritten acceptable-page list. Retaining the failure keeps the metric reproducible. The new 95% result and old 81.25% result use different datasets; they do not isolate the effect of the retrieval change. A stronger model was unnecessary to meet the numerical goals on this new sample.

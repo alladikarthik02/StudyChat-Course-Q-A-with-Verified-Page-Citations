@@ -59,7 +59,7 @@ def test_censored_calibration_rejected(bundle):
 
 
 def test_synthetic_cannot_be_human_evidence(bundle):
-    with pytest.raises(ValueError, match="not_resume_evidence"):
+    with pytest.raises(ValueError, match="not_live_evidence"):
         require_official_evidence(bundle)
 
 

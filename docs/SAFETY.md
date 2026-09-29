@@ -19,7 +19,7 @@ Requirements are tracked individually below. T1–T7 implementation controls hav
 | S13 | Live provider transmission is explained; fixtures send no content | Mode/config/UI tests; provider spy | Live consent and fixture isolation tests pass; actual authorized embedding/dev capture succeeded. |
 | S14 | Bounded requests control accidental cost | Input/output caps, concurrency and timeout tests | Question/output/concurrency/time limits tested; token caps are not an account spending limit. |
 | S15 | Metrics cannot reward withholding every answer or omit failures | Zero-answer/all-failure fixtures; raw denominator assertions | Hand-derived paired metrics, missing/zero-answer and heldout-isolation tests pass. |
-| S16 | Gold labels and measured resume claims are not invented | Evidence manifest and human-label provenance review | Synthetic labels explicit; official mode rejects them. No interviews or human labels claimed. |
+| S16 | Gold labels and measured project claims are not invented | Evidence manifest and human-label provenance review | Synthetic labels explicit; official mode rejects them. No interviews or human labels claimed. |
 
 Prompt fencing reduces risk but is not a guarantee against prompt injection. The first project exposes no model tools, credentials, or cross-user data. Dedicated attack generation and classifiers belong to project 3. Uploaded PDFs remain untrusted even when a quote matches them.
 

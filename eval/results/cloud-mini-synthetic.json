@@ -1,0 +1,129 @@
+{
+  "provenance": "AI-authored synthetic cloud chapter; not independent human labels or entailment accuracy",
+  "source_pdfs_published": false,
+  "development_questions": 5,
+  "questions": 20,
+  "schema_version": 1,
+  "mode": "live",
+  "origin": "local_app_stream_capture",
+  "dataset_sha256": "4add7ee68c9b95bcbf3cf93300352c052a2fcda45a0792b09d685d398b5afd0b",
+  "corpus_sha256": "e4804a9c6ee75f44c60b783647bd3193fcb19a1b84df4ba531503ff30a1e165c",
+  "records_sha256": "992ebdc4bd46a28f38e694a688f5a4f735713e159c1d794b783ba4388a269e06",
+  "git_revision": "a373ba5c61b7fad15d5fd2632d96ee7d7f474440",
+  "started_at": "2026-09-29T19:21:31.747117+00:00",
+  "chat_model": "gpt-5.4-mini-2026-03-17",
+  "embedding_model": "text-embedding-3-small",
+  "prompt_hash": "c057fb55dae9c356106d79d0e1a79bf88678729df869cf44291bccc852200386",
+  "generation_threshold": -1.0,
+  "threshold_label": "cloud-synthetic-dev-5-frozen",
+  "max_output_tokens": 4000,
+  "dependency_hashes": {
+    "backend/requirements.txt": "4a9438c348aeb391c399728222547be69c5b6e199b8d90265bf748a435e71aae",
+    "frontend/pnpm-lock.yaml": "037c3ac505a491a876709f279ed7e51007b31e42e947f917b16a9ff1cd2c5aae"
+  },
+  "normalization_version": "nfkc-grapheme-dehyphen-ws-v2",
+  "verifier_version": "quote-v1",
+  "split": "heldout",
+  "calibration_sha256": "76c322278dd100b7f6446bf7187d49d7270160af55820f8bf1b93817266a0f8d",
+  "reports": {
+    "off": {
+      "evidence_kind": "synthetic",
+      "provider_mode": "live",
+      "split": "heldout",
+      "quotes": "off",
+      "exact_only": false,
+      "total": 20,
+      "answered": 20,
+      "correct": 19,
+      "answer_rate": 1.0,
+      "page_accuracy_among_answered": 0.95,
+      "joint_success": 0.95,
+      "answer_rate_95pct_interval": [
+        0.8388698745050667,
+        1
+      ],
+      "page_accuracy_95pct_interval": [
+        0.7638641064874331,
+        0.9911187805671268
+      ],
+      "abstentions": 0,
+      "errors": 0,
+      "retrieval_gold_page_recall_at_6": 1.0,
+      "removed_citations": {},
+      "match_counts": {},
+      "target_met": true,
+      "failed_question_ids": [
+        "cloud-synthetic-020"
+      ]
+    },
+    "on": {
+      "evidence_kind": "synthetic",
+      "provider_mode": "live",
+      "split": "heldout",
+      "quotes": "on",
+      "exact_only": false,
+      "total": 20,
+      "answered": 20,
+      "correct": 19,
+      "answer_rate": 1.0,
+      "page_accuracy_among_answered": 0.95,
+      "joint_success": 0.95,
+      "answer_rate_95pct_interval": [
+        0.8388698745050667,
+        1
+      ],
+      "page_accuracy_95pct_interval": [
+        0.7638641064874331,
+        0.9911187805671268
+      ],
+      "abstentions": 0,
+      "errors": 0,
+      "retrieval_gold_page_recall_at_6": 1.0,
+      "removed_citations": {
+        "quote_not_found": 1
+      },
+      "match_counts": {
+        "exact": 46,
+        "approximate": 7
+      },
+      "target_met": true,
+      "failed_question_ids": [
+        "cloud-synthetic-020"
+      ]
+    },
+    "exact_only": {
+      "evidence_kind": "synthetic",
+      "provider_mode": "live",
+      "split": "heldout",
+      "quotes": "on",
+      "exact_only": true,
+      "total": 20,
+      "answered": 20,
+      "correct": 19,
+      "answer_rate": 1.0,
+      "page_accuracy_among_answered": 0.95,
+      "joint_success": 0.95,
+      "answer_rate_95pct_interval": [
+        0.8388698745050667,
+        1
+      ],
+      "page_accuracy_95pct_interval": [
+        0.7638641064874331,
+        0.9911187805671268
+      ],
+      "abstentions": 0,
+      "errors": 0,
+      "retrieval_gold_page_recall_at_6": 1.0,
+      "removed_citations": {
+        "quote_not_found": 8
+      },
+      "match_counts": {
+        "exact": 46
+      },
+      "target_met": true,
+      "failed_question_ids": [
+        "cloud-synthetic-020"
+      ]
+    }
+  }
+}
