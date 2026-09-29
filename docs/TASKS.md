@@ -102,3 +102,9 @@ The combined resume target remains unmet by 8.75 accuracy percentage points. Two
 ## T9: final handoff
 
 The original nine tasks were numbered T0–T8; T9 records the user's requested final handoff. Added current setup/status, qualified resume wording, measured synthetic results and interview preparation. T7 passed clean GitHub CI (run 36476532843). The app is configured for GPT-5.4 mini with locally stored sources. All completed checkpoints are pushed separately. Remaining limitations are evidence/quality gaps documented in EVALUATION_RESULTS.md, not concealed implementation success claims.
+
+## R1: post-handoff accuracy improvement
+
+Implemented hybrid semantic/lexical retrieval and a bounded model relevance selector. Added strict selector validation tests and a selected-document/rare-term database regression. Five new synthetic development questions all completed; four passed the frozen page labels. Kept GPT-5.4 mini because the failure cites relevant pages omitted from the labels. Original 13/16 evidence remains unchanged. Added 25 original synthetic question templates for a new local cloud-computing chapter: five dev and twenty untouched heldout questions. PDFs and raw answers remain local. R2 will evaluate the frozen implementation once and publish the aggregate, including failures.
+
+R1 validation: 117 existing backend tests plus the new hybrid database regression passed (118 total tested cases), 11 frontend unit tests, seven Chromium workflows, production build, Ruff and diff whitespace checks passed. One upstream Starlette test-client deprecation warning remains. Extra selector latency/cost and incomplete synthetic page labels are documented. Next: R2 frozen evaluation and handoff.

@@ -36,8 +36,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--corpus", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--template-dir", type=Path, default=Path(__file__).parent / "coursework")
     args = parser.parse_args()
-    root = Path(__file__).parent / "coursework"
+    root = args.template_dir
     rows = [
         json.loads(line) for line in (root / "questions.template.jsonl").read_text().splitlines()
     ]

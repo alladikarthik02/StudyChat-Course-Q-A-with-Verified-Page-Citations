@@ -74,8 +74,15 @@ class ChatService:
                 vectors = await self.provider.embed([body.question])
                 validate_embeddings(vectors, 1, self.settings.embedding_dimensions)
                 chunks = await asyncio.to_thread(
-                    retrieve, self.settings, body.document_ids, vectors[0], self.provider.model
+                    retrieve,
+                    self.settings,
+                    body.document_ids,
+                    vectors[0],
+                    self.provider.model,
+                    body.question,
+                    32,
                 )
+                chunks = await self.provider.select_context(body.question, chunks)
                 aliases = {
                     f"D{i}": doc_id
                     for i, doc_id in enumerate(
@@ -89,7 +96,10 @@ class ChatService:
                     {key: c[key] for key in ("document_id", "page", "similarity", "alias")}
                     for c in chunks
                 ]
-                if not chunks or chunks[0]["similarity"] < self.settings.similarity_threshold:
+                if (
+                    not chunks
+                    or max(c["similarity"] for c in chunks) < self.settings.similarity_threshold
+                ):
                     yield event("abstain", reason="insufficient_context", retrieval=trace)
                     yield event("done", outcome="abstained")
                     return

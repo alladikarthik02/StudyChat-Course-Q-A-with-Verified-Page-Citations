@@ -11,3 +11,7 @@ Official references: [GPT-5.5 pricing and snapshot](https://developers.openai.co
 ## Current selection: GPT-5.4 mini
 
 The user subsequently selected `gpt-5.4-mini-2026-03-17`. It replaces GPT-5.5 as the active default and private environment override, retaining explicit low reasoning and the 4,000-token output cap. Six mocked provider tests pass. Pricing is $0.75 per million input tokens and $4.50 per million output tokens. At 5,000 input / 1,000 total output tokens, 24 questions are approximately $0.20; at 4,000 output tokens, approximately $0.52, excluding embeddings/retries. These are estimates rather than a spending limit. The prior GPT-5.5 section records the superseded choice. Reference: https://developers.openai.com/api/docs/models/gpt-5.4-mini
+
+## R1 configuration
+
+GPT-5.4 mini remains selected after the fresh five-question development run (5/5 answered, 4/5 passing page labels). The failed label check involved additional relevant pages, not an established need for a stronger model. Hybrid retrieval now adds a relevance-selection request using the same model, low reasoning, and a 1,200-token output cap. Earlier one-request cost examples understate this new pipeline; actual cost includes candidate input plus selector output, answer input/output and embeddings. No exact spend is claimed.

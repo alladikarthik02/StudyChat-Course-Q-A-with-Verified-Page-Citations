@@ -92,3 +92,9 @@ The first live coursework ingestion failed; a minimal provider diagnostic establ
 Eight GPT-5.4 mini development requests completed, but grouped citations and a paraphrased quote reduced answer coverage. The prompt now shows separate bracket pairs and forbids quote abbreviation. One retrieval miss came from splitting an explanation across adjacent slides. Reserving two of six context slots for neighbors of the best semantic hit restores local context while preserving selected-document scope and a bounded prompt. A dedicated database test checks neighbor inclusion and cross-document exclusion.
 
 The capture client now rejects unknown events, post-final deltas, inconsistent final outcomes and model/threshold drift. Seven mock-stream tests cover these failure modes. Browser tests and clean GitHub CI validate the build independently of local dependencies. An old server survived Docker shutdown and held the storage lock; stopping the old process resolved startup without deleting source files.
+
+## R1: rare terms and over-complete answers
+
+The original recurrent-weight failure retrieved overview slides instead of the equation. A simple lexical OR search favored short generic slides. IDF-weighted stemmed terms plus a 32-candidate relevance pass recovered pages 92/93; the selector chose page 92 in a diagnostic. This diagnostic is development evidence, not a revised holdout score.
+
+A fresh cloud-computing chapter produced five completed development answers, four passing frozen page labels. The fifth described Domain 0 using additional relevant pages 23 and 36 outside its labels (12/13). The score remains 4/5: changing labels after outputs would hide annotation limitations. GPT-5.4 mini stays selected because this failure does not establish a model-capability bottleneck. The user authorized GPT-5.5 if needed, but higher cost alone cannot fix incomplete labels.

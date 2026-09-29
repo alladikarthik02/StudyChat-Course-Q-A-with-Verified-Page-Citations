@@ -298,3 +298,32 @@ async def test_retrieval_reserves_neighbor_context_without_crossing_documents(
         assert rows[0]["page"] == 5
         assert {4, 6} <= {r["page"] for r in rows}
         assert all(r["document_id"] == doc_id and r["page"] > 0 for r in rows)
+
+
+@pytest.mark.integration
+def test_hybrid_recovers_rare_term_outside_semantic_pool(db_settings, pdf_bytes):
+    from studychat.db import connection
+
+    with TestClient(create_app(db_settings)) as client:
+        pages = [f"Common background page {i}" for i in range(1, 35)]
+        pages[-1] = "Zygomorphic flowers have bilateral symmetry."
+        doc_id = UUID(upload(client, pdf_bytes(tuple(pages))))
+        wait_document(client, doc_id)
+        other = UUID(upload(client, pdf_bytes((pages[-1],))))
+        wait_document(client, other)
+        vector = [1.0] + [0.0] * 1535
+        with connection(db_settings, vectors=True) as conn:
+            conn.execute(
+                "UPDATE chunks SET embedding=%s::vector WHERE document_id=%s",
+                (vector, doc_id),
+            )
+            conn.execute(
+                "UPDATE chunks SET embedding=%s::vector WHERE document_id=%s AND page=34",
+                ([0.0, 1.0] + [0.0] * 1534, doc_id),
+            )
+        rows = retrieve(db_settings, [doc_id], vector, "fixture-hash-v1", "zygomorphic", 32)
+        assert len(rows) <= 32
+        assert 34 in {row["page"] for row in rows}
+        assert all(row["document_id"] == doc_id and row["page"] > 0 for row in rows)
+        assert len({(r["page"], r["ordinal"]) for r in rows}) == len(rows)
+        assert all("terms" not in row for row in rows)

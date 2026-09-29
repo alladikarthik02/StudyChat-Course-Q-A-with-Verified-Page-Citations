@@ -147,3 +147,9 @@ Limits: 100,000 answer characters, 100 citations, 2,000 raw/normalized quote cha
 ## Development-driven retrieval refinement
 
 The first live synthetic development run missed a slide explaining k-hop propagation even though its adjacent overview slide ranked first. Retrieval now keeps four cosine-ranked chunks and reserves up to two slots for the immediately preceding/following physical pages of the highest-ranked hit. Duplicate chunks are skipped and remaining semantic hits fill unused slots, with six chunks maximum. The highest-scoring anchor remains first for threshold gating. Neighboring context is always from the same selected ready document. This changes the original pure top-six retrieval plan; it is evaluated on development questions before freezing heldout configuration.
+
+## Post-handoff hybrid retrieval (R1)
+
+The live path now builds up to 32 deduplicated candidates from 24 exact-cosine hits, 12 IDF-weighted stemmed lexical hits and two neighbor chunks. Sixteen semantic hits have priority before lexical/neighbor expansion; remaining semantic hits fill unused slots. All branches enforce selected ready documents, page > 0 and matching embedding model. A model relevance pass selects at most six existing chunk indices using a strict schema; invalid, duplicate or out-of-range indices fail safely. The answer and verifier still see at most six chunks/pages. Threshold gating uses the maximum selected cosine similarity. Both prompts participate in the calibration hash.
+
+Tradeoffs: an additional model request adds latency and API cost. Lexical scoring scans selected documents in memory, suitable for the bounded local project, not a large multi-user service. A production version should index lexical statistics. Model selection is not proof of relevance or entailment.

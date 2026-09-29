@@ -18,6 +18,9 @@ class FixtureProvider:
     dimensions = 1536
     chat_model = "fixture-extractive-v1"
 
+    async def select_context(self, question, chunks):
+        return chunks[:6]
+
     async def stream_answer(self, question, chunks):
         import asyncio
         import json
@@ -100,6 +103,81 @@ class OpenAIProvider:
             return vectors
         except (httpx.HTTPError, ValueError, KeyError, TypeError):
             raise ProviderError("embedding_provider_error") from None
+
+    async def select_context(self, question, chunks):
+        import json
+
+        import httpx
+
+        from studychat.prompt import RERANK_PROMPT
+
+        if not chunks:
+            return []
+        try:
+            response = await self.client.post(
+                "responses",
+                json={
+                    "model": self.chat_model,
+                    "instructions": RERANK_PROMPT,
+                    "input": json.dumps(
+                        {
+                            "question": question,
+                            "excerpts": [
+                                {"index": i, "text": c["text"]} for i, c in enumerate(chunks)
+                            ],
+                        },
+                        ensure_ascii=False,
+                    ),
+                    "store": False,
+                    "max_output_tokens": 1200,
+                    **(
+                        {"reasoning": {"effort": "low"}}
+                        if self.chat_model == "gpt-5.4-mini-2026-03-17"
+                        else {}
+                    ),
+                    "text": {
+                        "format": {
+                            "type": "json_schema",
+                            "name": "context_selection",
+                            "strict": True,
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "indices": {
+                                        "type": "array",
+                                        "items": {"type": "integer"},
+                                        "maxItems": 6,
+                                    }
+                                },
+                                "required": ["indices"],
+                                "additionalProperties": False,
+                            },
+                        }
+                    },
+                },
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if payload.get("status") != "completed":
+                raise ValueError("incomplete_reranking")
+            output = "".join(
+                part["text"]
+                for item in payload["output"]
+                if item.get("type") == "message"
+                for part in item.get("content", [])
+                if part.get("type") == "output_text"
+            )
+            indices = json.loads(output)["indices"]
+            if (
+                not isinstance(indices, list)
+                or len(indices) > 6
+                or any(type(i) is not int or i < 0 or i >= len(chunks) for i in indices)
+                or len(set(indices)) != len(indices)
+            ):
+                raise ValueError("invalid_reranking")
+            return [chunks[i] for i in indices]
+        except (httpx.HTTPError, ValueError, KeyError, TypeError):
+            raise ProviderError("context_selection_failed") from None
 
     async def stream_answer(self, question, chunks):
         import json

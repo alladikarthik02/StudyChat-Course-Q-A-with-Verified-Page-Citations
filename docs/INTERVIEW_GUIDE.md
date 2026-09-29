@@ -29,3 +29,7 @@ Questions were split before model generation. Only the eight development outputs
 ## What breaks in production?
 
 This is a local single-user app. It lacks account isolation, public authentication, OCR and production hosting operations. It intentionally permits one service owner, bounds requests, and exposes no model tools. Scaling would require durable job orchestration, authenticated per-owner document access and operational monitoring. None of those capabilities are claimed here.
+
+## Why add a relevance-selection stage?
+
+Embedding similarity missed a specific recurrent-weight equation. Stemmed rare-term retrieval expanded recall, and a model selected up to six passages from a bounded candidate pool. Invalid model indices fail safely. This costs an extra request and adds latency; a lexical scan is acceptable here but needs indexing at scale. Better retrieval does not prove answer correctness: the synthetic page labels and quote checks measure narrower properties. Preserve old scores and evaluate a new frozen question set after tuning.

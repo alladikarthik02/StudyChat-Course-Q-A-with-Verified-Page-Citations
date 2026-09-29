@@ -48,3 +48,7 @@ Scoped cosine retrieval, model mismatch, deleted source, pre-delta abstention, m
 ## T5 evidence
 
 S05/S06/S07/S09/S13 are now exercised in the browser: no model HTML execution; no citation chips on interrupted/cancelled streams; exact versus approximate labels; source highlight fallback; explicit live-mode consent. Tests cover UTF-8/frame boundaries and invalid stream transitions. Full accessibility audits and broader browser support remain T7 concerns; Chromium desktop and mobile viewport are tested here.
+
+## R1 review
+
+Relevance selection receives untrusted question/excerpts, no tools or credentials, and uses store:false. The server accepts only unique integer indices into its own scoped candidate list, at most six; mocks cover invalid types, duplicates and bounds. A real database regression verifies rare-term recovery while excluding unselected documents and metadata. Existing revalidation after generation protects against deleted sources. Two model requests share the existing chat deadline; selection has a 1,200-output-token cap in addition to the 4,000 answer cap. These caps are not a dollar spending limit.
