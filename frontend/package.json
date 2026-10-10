@@ -11,6 +11,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@alladikarthik/stream-md": "file:vendor/alladikarthik-stream-md-0.1.0.tgz",
     "pdfjs-dist": "^6.3.289",
     "react": "19.2.0",
     "react-dom": "19.2.0"

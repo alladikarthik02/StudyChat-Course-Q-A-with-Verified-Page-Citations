@@ -505,3 +505,13 @@ p {
     top: 65px;
   }
 }
+
+/* Stream MD shares the existing chat scroller; citation controls remain outside it. */
+.answer-text { white-space: normal; overflow-wrap: anywhere; }
+.answer-text pre { white-space: pre-wrap; padding: 16px; background: #edf1e8; border-radius: 8px; overflow: auto; }
+.answer-text table { border-collapse: collapse; max-width: 100%; display: block; overflow: auto; }
+.answer-text td, .answer-text th { padding: 8px; border: 1px solid #d4dccc; }
+.answer-text blockquote { border-left: 3px solid #9bb587; margin-left: 0; padding-left: 16px; }
+.answer-text .hljs-keyword { color: #845791; }
+.answer-text .hljs-string { color: #477b42; }
+.chat-scroll { overflow-anchor: none; }

@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 const PdfViewer = lazy(() =>
   import("./PdfViewer").then((module) => ({ default: module.PdfViewer })),
 );
+import { MarkdownController } from "@alladikarthik/stream-md";
+import { AnswerMarkdown } from "./AnswerMarkdown";
 import { readEvents } from "./sse";
 import type {
   Citation,
@@ -16,6 +18,7 @@ type Turn = {
   id: string;
   question: string;
   text: string;
+  renderer: MarkdownController;
   status: string;
   result?: Verification;
 };
@@ -48,6 +51,8 @@ function App() {
   const controller = useRef<AbortController | null>(null),
     chatScroll = useRef<HTMLDivElement>(null),
     follow = useRef(true);
+  const chatContent = useRef<HTMLDivElement>(null);
+  const renderers = useRef<MarkdownController[]>([]);
   const permitted = !!config && (!config.transmits_content || consent);
   useEffect(() => {
     const abort = new AbortController();
@@ -75,12 +80,22 @@ function App() {
       abort.abort();
       clearTimeout(timer);
       controller.current?.abort();
+      renderers.current.forEach((renderer) => renderer.dispose());
     };
   }, []);
   useEffect(() => {
     const el = chatScroll.current;
     if (el && follow.current) el.scrollTop = el.scrollHeight;
   }, [turns]);
+  useEffect(() => {
+    const el = chatScroll.current;
+    if (!el || !chatContent.current) return;
+    const observer = new ResizeObserver(() => {
+      if (follow.current) el.scrollTop = el.scrollHeight;
+    });
+    observer.observe(chatContent.current);
+    return () => observer.disconnect();
+  }, []);
   async function upload(file?: File) {
     if (!file) return;
     if (file.size > 20 * 1024 * 1024) {
@@ -146,6 +161,8 @@ function App() {
     const id = crypto.randomUUID(),
       prompt = question;
     const abort = new AbortController();
+    const renderer = new MarkdownController();
+    renderers.current.push(renderer);
     controller.current = abort;
     setQuestion("");
     setStreaming(true);
@@ -153,7 +170,13 @@ function App() {
     follow.current = true;
     setTurns((old) => [
       ...old,
-      { id, question: prompt, text: "", status: "Finding relevant pages…" },
+      {
+        id,
+        renderer,
+        question: prompt,
+        text: "",
+        status: "Finding relevant pages…",
+      },
     ]);
     function update(patch: Partial<Turn>) {
       setTurns((old) => old.map((t) => (t.id === id ? { ...t, ...patch } : t)));
@@ -176,11 +199,13 @@ function App() {
       if (!response.body) throw new Error("Streaming is unavailable");
       await readEvents(response.body, (item) => {
         if (item.event === "delta") {
+          if (!answer)
+            update({
+              status: "Provisional · checking citations after the stream",
+            });
           answer += item.text!;
-          update({
-            text: answer,
-            status: "Provisional · checking citations after the stream",
-          });
+          if (!renderer.append(item.text!))
+            throw new Error("Answer rendering limit reached");
         }
         if (item.event === "verification") verified = item.result;
         if (item.event === "abstain")
@@ -194,7 +219,11 @@ function App() {
       });
       if (failure || outcome === "error")
         throw new Error(failure || "Generation failed");
-      if (verified)
+      if (verified) {
+        renderer.reset();
+        if (!renderer.append(verified.text))
+          throw new Error("Answer rendering limit reached");
+        renderer.finish();
         update({
           text: verified.text,
           result: verified,
@@ -202,9 +231,17 @@ function App() {
             ? "Citations checked · review the source"
             : "No verified citations",
         });
-      else if (outcome !== "abstained")
+      } else if (outcome === "abstained") {
+        renderer.reset();
+        renderer.append(
+          "I could not find enough supporting context in the selected PDFs.",
+        );
+        renderer.finish();
+      } else if (outcome !== "abstained")
         throw new Error("No final verification received");
     } catch (e) {
+      if (abort.signal.aborted) renderer.cancel();
+      else renderer.fail("Answer interrupted; displayed text is unverified.");
       update({
         result: undefined,
         status: abort.signal.aborted
@@ -328,72 +365,77 @@ function App() {
         <div
           className="chat-scroll"
           ref={chatScroll}
+          onWheel={(event) => {
+            if (event.deltaY < 0) follow.current = false;
+          }}
           onScroll={() => {
             const el = chatScroll.current!;
             follow.current =
               el.scrollHeight - el.scrollTop - el.clientHeight < 40;
           }}
         >
-          {!turns.length && (
-            <div className="welcome">
-              <span className="welcome-symbol">↗</span>
-              <h2>
-                Go from a question
-                <br />
-                to the source.
-              </h2>
-              <p>
-                Add a course PDF, select it, and ask about what you’re reading.
-                Each checked citation takes you back to the page.
-              </p>
-              <div className="steps">
-                <span>01 · Add material</span>
-                <span>02 · Ask a question</span>
-                <span>03 · Check the quote</span>
-              </div>
-            </div>
-          )}
-          {turns.map((turn) => (
-            <article className="turn" key={turn.id}>
-              <div className="question">
-                <span>YOU</span>
-                <p>{turn.question}</p>
-              </div>
-              <div className="answer">
-                <span>STUDYCHAT</span>
-                <p className="answer-status" role="status">
-                  {turn.status}
+          <div ref={chatContent}>
+            {!turns.length && (
+              <div className="welcome">
+                <span className="welcome-symbol">↗</span>
+                <h2>
+                  Go from a question
+                  <br />
+                  to the source.
+                </h2>
+                <p>
+                  Add a course PDF, select it, and ask about what you’re
+                  reading. Each checked citation takes you back to the page.
                 </p>
-                <div className="answer-text">{turn.text}</div>
-                {turn.result && (
-                  <div className="citations">
-                    {turn.result.citations.map((citation, index) =>
-                      citation.status === "removed" ? (
-                        <span className="removed" key={index}>
-                          Citation removed
-                        </span>
-                      ) : (
-                        <button
-                          className="citation-chip"
-                          key={index}
-                          onClick={() => openCitation(citation)}
-                        >
-                          {citation.status === "exact" ? "✓" : "≈"}{" "}
-                          {citation.citation.raw.match(/D\d+/)?.[0]} · Page{" "}
-                          {citation.citation.page}
-                          <small>
-                            {citation.status === "exact"
-                              ? "Exact quote match"
-                              : "Approximate quote match"}
-                          </small>
-                        </button>
-                      ),
-                    )}
-                  </div>
-                )}
+                <div className="steps">
+                  <span>01 · Add material</span>
+                  <span>02 · Ask a question</span>
+                  <span>03 · Check the quote</span>
+                </div>
               </div>
-            </article>
-          ))}
+            )}
+            {turns.map((turn) => (
+              <article className="turn" key={turn.id}>
+                <div className="question">
+                  <span>YOU</span>
+                  <p>{turn.question}</p>
+                </div>
+                <div className="answer">
+                  <span>STUDYCHAT</span>
+                  <p className="answer-status" role="status">
+                    {turn.status}
+                  </p>
+                  <AnswerMarkdown renderer={turn.renderer} />
+                  {turn.result && (
+                    <div className="citations">
+                      {turn.result.citations.map((citation, index) =>
+                        citation.status === "removed" ? (
+                          <span className="removed" key={index}>
+                            Citation removed
+                          </span>
+                        ) : (
+                          <button
+                            className="citation-chip"
+                            key={index}
+                            onClick={() => openCitation(citation)}
+                          >
+                            {citation.status === "exact" ? "✓" : "≈"}{" "}
+                            {citation.citation.raw.match(/D\d+/)?.[0]} · Page{" "}
+                            {citation.citation.page}
+                            <small>
+                              {citation.status === "exact"
+                                ? "Exact quote match"
+                                : "Approximate quote match"}
+                            </small>
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
         <footer className="composer-area">
           {error && (

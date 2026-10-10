@@ -227,3 +227,59 @@ test("mobile library and composer remain within the viewport", async ({
   ).toBeLessThanOrEqual(390);
   await expect(page.getByLabel("Ask about your PDFs")).toBeVisible();
 });
+
+test("renders streamed Markdown and replaces provisional output only after verified completion", async ({
+  page,
+}) => {
+  await upload(page);
+  await page.evaluate(() => {
+    const original = window.fetch;
+    window.fetch = async (input, init) => {
+      if (String(input) !== "/api/chat") return original(input, init);
+      const encoder = new TextEncoder();
+      let seq = 0;
+      return new Response(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            const emit = (event: string, fields: object = {}) =>
+              controller.enqueue(
+                encoder.encode(
+                  `event: ${event}\ndata: ${JSON.stringify({ event, seq: ++seq, request_id: "markdown-test", ...fields })}\n\n`,
+                ),
+              );
+            emit("start");
+            emit("delta", {
+              text: "# Provisional heading\n\n```js\nconst value = 42;\n```\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n",
+            });
+            setTimeout(() => {
+              emit("verification", {
+                result: {
+                  text: "## Checked answer\n\n**Final text** [citation removed]",
+                  citations: [],
+                  has_verified_citations: false,
+                },
+              });
+              emit("done", { outcome: "no_verified_citations" });
+              controller.close();
+            }, 1200);
+          },
+        }),
+        { headers: { "Content-Type": "text/event-stream" } },
+      );
+    };
+  });
+  await page.getByLabel("Ask about your PDFs").fill("Explain with Markdown");
+  await page.getByRole("button", { name: "Ask ↗" }).click();
+  await expect(page.locator(".answer-text h1")).toHaveText(
+    "Provisional heading",
+  );
+  await expect(page.locator(".answer-text table")).toBeVisible();
+  await expect(page.locator(".answer-text .hljs-keyword")).toHaveText("const");
+  await expect(page.locator(".citation-chip")).toHaveCount(0);
+  await expect(page.locator(".answer-text h2")).toHaveText("Checked answer");
+  await expect(page.locator(".answer-text h1")).toHaveCount(0);
+  await expect(page.locator(".answer-text strong")).toHaveText("Final text");
+  await expect(page.locator(".answer-text")).toContainText(
+    "[citation removed]",
+  );
+});

@@ -102,3 +102,13 @@ A fresh cloud-computing chapter produced five completed development answers, fou
 ## R2: evaluate without relabeling the outcome
 
 The fresh cloud benchmark completed all 20 questions and passed 19 page checks. The failed answer cited page 32, which directly describes memory precopy but was missing from the prewritten acceptable-page list. Retaining the failure keeps the metric reproducible. The new 95% result and old 81.25% result use different datasets; they do not isolate the effect of the retrieval change. A stronger model was unnecessary to meet the numerical goals on this new sample.
+
+## StudyChat integration and evidence capture — 2026-10-10
+
+The answer has two lifecycles: provisional stream text and a final citation-verified replacement. Finishing on the last delta could leave unsupported text visible as verified. The integration resets and finishes the renderer with the verified answer only after the complete valid event sequence, keeping citation chips separate. A browser test checks both phases, including formatted code and tables.
+
+Frame-batched child updates no longer trigger parent state changes on every token. That also removes the old parent-driven scroll signal. A ResizeObserver on the chat content now follows rendered growth while respecting the reader's existing pause state; the app retains one viewport.
+
+A relative vendored tarball makes a clean StudyChat checkout reproducible without publishing a package or depending on an absolute workstation path. Its version and checksum are recorded beside it.
+
+Real capture failed during lesson ingestion despite successful local PDF extraction. A minimal provider request isolated HTTP 401 token_invalidated; a user-requested retry confirmed the same result. No fixture output is substituted for live evidence. The authored 40 questions, capture client and token accounting are ready; collecting and benchmarking actual responses requires a valid key. Token totals describe visible text rather than billing usage. Citations containing brackets still activate the renderer's conservative full-parse fallback, so integration alone proves no speedup for those answers.

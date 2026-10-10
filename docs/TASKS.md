@@ -28,3 +28,7 @@ Ingestion preserves physical pages; retrieval finds relevant passages; verificat
 ## Actual challenges
 
 See CHALLENGES.md for PDF extraction boundaries, Unicode source offsets, stream completion, calibration contamination, rare-term retrieval and incomplete synthetic page labels. See SAFETY.md for evidence supporting each protection.
+
+## Streaming Markdown integration — complete, 2026-10-10
+
+Integrated the local stream-md package with per-answer controllers, verified replacement and the existing reader-controlled viewport. Added a browser scenario for provisional headings, code, tables and final replacement. Validation: frontend build, 118 backend tests, 11 frontend tests and eight Chromium browser scenarios pass. Live benchmark recordings remain blocked by HTTP 401 token_invalidated; the capture tools and 40 original workloads live in the renderer repository.
